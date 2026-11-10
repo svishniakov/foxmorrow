@@ -12,7 +12,7 @@ Based on: [foxmorrow v1: дизайн](../design/2026-11-10-foxmorrow-v1-design.
 | 003 | Роли, профили, брифы | Перенос 21 роли, `roles/roles.json`, `profiles/devin.json` с таблицей семейств, генератор `agents/` с маркером `foxmorrow-role-sha256`, `sync`, проектные роли, проверка skills, шаблоны брифа `en` и `ru`, `assign` без низкоуровневых флагов | 001, результаты 000 | [готов](impl-003-roles-profiles-briefs.md) |
 | 002 | Адаптер Devin: доказательства | Карта схемы и reader `sessions.db` → `ChainObservation`, `foxmorrow hook`, CLI `verify` и `finalize`, запись модели и `session_id` root | 001, 003, результаты 000 | [готов](impl-002-devin-evidence.md) |
 | 004 | Skill `fox` и Doc Flow | `skills/fox/SKILL.md`, references, порядок BRD, ADR, PRD, плана, `init --doc` и `init --plan` с проверкой цепочки `Based on` | 001, 003 | [готов](impl-004-skill-doc-flow.md) |
-| 005 | Дистрибуция | Загрузчики, `checksums.json`, `hooks.json`, манифест плагина, CI-матрица на 5 платформ, выпуск по тегу, README | 002–004 | после 004 |
+| 005 | Дистрибуция | Загрузчики, `checksums.json`, `hooks.json`, манифест плагина, CI-матрица на 5 платформ, выпуск по тегу, README | 002–004 | [готов](impl-005-distribution.md) |
 
 ## Границы между планами
 

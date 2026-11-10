@@ -948,7 +948,25 @@ git -c credential.helper= -c 'credential.helper=!gh auth git-credential' pull --
 
 ## Результаты внешней части
 
-Заполняется в задаче 10.
+Проверки выполнены 10 ноября 2026 года на macOS arm64, Devin CLI `3000.12.43`.
+
+| Критерий | Результат | Доказательство |
+|---|---|---|
+| CI на трёх ОС | подтверждено | Run `42880901630` для `90e4fd3`: `ubuntu-latest`, `macos-latest`, `windows-latest` успешны. Первый прогон упал на Windows: `Get-FileHash` недоступен в PowerShell 5.1 раннера; загрузчик теперь считает SHA-256 и скачивает средствами .NET |
+| Выпуск `v0.1.0` | подтверждено | Run `42881374951`: пять сборок и `publish` успешны. В выпуске пять бинарников и `checksums.json`; коммит `b2b2ee6 Record checksums for v0.1.0` в `main`, тест версий и хешей проходит |
+| Установка плагина | подтверждено | `devin plugins install --local svishniakov/foxmorrow -y`: `version: 0.1.0`, источник GitHub, skill `/foxmorrow:fox`, 21 роль `foxmorrow:<role>`, hooks `UserPromptSubmit` и `PostCompaction` |
+| Живой run `$fox` | подтверждено | Run `r-da20e1efd8` в `/tmp/foxmorrow-live`: hook записал `.foxmorrow/session` (`session_id` сессии и `prompt_id`); `a-01` `python-worker` (`swe-2-high`), `a-03` `reviewer` и `a-04` `qa-verifier` (`gpt-6-1-sol-high`) приняты с источником `devin-sessions-db map=1 migration=20`; `a-02` reviewer отклонён за ссылку на чужую квитанцию; final `passed`, `root_model: swe-2-high`, `family_rule: true`. `scripts/hello.sh` печатает `hello` |
+| Quarantine на macOS | подтверждено | Бинарник в `~/.cache/foxmorrow/0.1.0/aarch64-apple-darwin/foxmorrow` запускается, `xattr -l` не показывает `com.apple.quarantine`, SHA-256 совпадает с `checksums.json` |
+| `PostCompaction` | не проверено | Нужна интерактивная сессия с `/compact`; в режиме `-p` её не вызвать |
+| Обновление плагина | проверено | Новая сессия не подхватывает коммит в `main`; после `devin plugins update foxmorrow` содержимое обновилось. README это и указывает |
+
+Найдено в живом run и исправлено коммитом `eb628ab`:
+
+* Текст `qa-verifier` требовал поле `reviewer` в отчёте, а контракт `contract.md` описывал `resolves` как список. Схема отчёта отклоняла оба варианта, root дважды возвращал QA к отчёту. Теперь роль и контракт совпадают со схемой ядра.
+
+Найдено и не исправлено в этом репозитории:
+
+* `arch-simplicity-guard` в Devin не выполняется: его `scripts/render_instructions.py` требует `CODEX_THREAD_ID`. Reviewer провёл проверку без guard и указал это в отчёте. Исправление относится к репозиторию guard.
 
 ## Что остаётся непроверенным после плана
 
