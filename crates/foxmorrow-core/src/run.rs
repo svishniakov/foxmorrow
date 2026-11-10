@@ -120,6 +120,21 @@ pub fn open_run(project_root: &Path, run_id: Option<&str>) -> Result<(Run, Journ
     Ok((run, journal))
 }
 
+pub fn record_root(
+    journal: &mut Journal,
+    session_id: Option<&str>,
+    model: Option<&str>,
+) -> Result<Run> {
+    journal.write(|tx| {
+        tx.execute(
+            "UPDATE run SET root_session_id = COALESCE(root_session_id, ?1), root_model = COALESCE(root_model, ?2)",
+            params![session_id, model],
+        )?;
+        Ok(())
+    })?;
+    load_run(journal.conn())
+}
+
 pub fn load_run(conn: &Connection) -> Result<Run> {
     let (run, criteria_json, paths_json, skills_json) = conn.query_row(
         "SELECT id, created_ms, project_root, criteria_path, criteria_heading, criteria_sha256, criteria_json, allowed_paths_json, family_rule, root_session_id, root_model, skills_summary_json FROM run",

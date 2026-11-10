@@ -6,15 +6,22 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use foxmorrow_core::assignment::{self, BriefDraft, NewAssignment};
+use foxmorrow_core::assignment::{self, Assignment, BriefDraft, NewAssignment};
 use foxmorrow_core::brief::{self, BriefInput, ContextItem};
 use foxmorrow_core::catalog::Catalog;
+use foxmorrow_core::claims::{self, ChainObservation, ModelFamilies};
 use foxmorrow_core::error::invalid;
+use foxmorrow_core::finalize;
+use foxmorrow_core::journal::Journal;
 use foxmorrow_core::model::Kind;
+use foxmorrow_core::model::VerificationState;
 use foxmorrow_core::run::{self, NewRun};
 use foxmorrow_core::{Error, Result, baseline, criteria, receipt, report, status};
 use foxmorrow_devin::agents::{self, PROJECT_PREFIX};
+use foxmorrow_devin::hook;
 use foxmorrow_devin::profile::{Profile, ProjectProfile};
+use foxmorrow_devin::reader::{self, ChainQuery, Reader};
+use foxmorrow_devin::schema_map::SchemaMap;
 use foxmorrow_devin::skills::{self, Inventory};
 use serde::Serialize;
 
@@ -25,6 +32,8 @@ struct Cli {
     project: Option<PathBuf>,
     #[arg(long, global = true)]
     plugin_root: Option<PathBuf>,
+    #[arg(long, global = true)]
+    sessions_db: Option<PathBuf>,
     #[command(subcommand)]
     command: Command,
 }
@@ -82,6 +91,21 @@ enum Command {
     Status {
         #[arg(long)]
         run: Option<String>,
+    },
+    Verify {
+        #[arg(short = 'a', long = "assignment")]
+        assignment: String,
+        #[arg(long)]
+        run: Option<String>,
+    },
+    Finalize {
+        #[arg(long = "report")]
+        report: String,
+        #[arg(long)]
+        run: Option<String>,
+    },
+    Hook {
+        event: String,
     },
     Sync {
         #[arg(long)]
@@ -144,23 +168,49 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             for repo in &repos {
                 baselines.push(baseline::collect(repo)?);
             }
-            let (created, _) = run::create_run(NewRun {
+            let evidence = open_reader(cli.sessions_db, &plugin.root);
+            let directory = root
+                .canonicalize()
+                .unwrap_or_else(|_| root.clone())
+                .display()
+                .to_string();
+            let session = session_id
+                .or_else(|| hook::read_session(&root).map(|record| record.session_id))
+                .or_else(|| {
+                    evidence
+                        .as_ref()
+                        .ok()
+                        .and_then(|reader| reader.latest_session_in(&directory).ok().flatten())
+                });
+            let root_model = match (&evidence, &session) {
+                (Ok(reader), Some(session)) => reader.root_model(session).ok().flatten(),
+                _ => None,
+            };
+            let (created, mut journal) = run::create_run(NewRun {
                 project_root: root,
                 criteria_path: file.to_string(),
                 criteria_heading: heading.to_string(),
                 criteria_markdown: markdown,
                 allowed_paths: paths,
                 baselines,
-                root_session_id: session_id,
+                root_session_id: session,
                 family_rule: plugin.profile.family_rule(&project_profile),
                 skills_summary: skills_summary.clone(),
             })?;
+            let created = if root_model.is_some() {
+                run::record_root(&mut journal, None, root_model.as_deref())?
+            } else {
+                created
+            };
             print_json(&serde_json::json!({
                 "run": created.id,
                 "criteria": created.criteria,
                 "family_rule": created.family_rule,
                 "skills_source": found.source,
                 "missing_skills": skills_summary,
+                "root_session_id": created.root_session_id,
+                "root_model": created.root_model,
+                "evidence": evidence.as_ref().map_or_else(|reason| format!("unavailable: {reason}"), Reader::source),
             }))?;
         }
         Command::Assign {
@@ -333,6 +383,77 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             let (current, journal) = run::open_run(&project_root, run_id.as_deref())?;
             print_json(&status::status(journal.conn(), &current)?)?;
         }
+        Command::Verify {
+            assignment: id,
+            run: run_id,
+        } => {
+            let project_root = project::for_existing(cli.project, &cwd)?;
+            let (current, mut journal) = run::open_run(&project_root, run_id.as_deref())?;
+            let plugin = Plugin::load(cli.plugin_root)?;
+            let evidence = open_reader(cli.sessions_db, &plugin.root);
+            let target = assignment::get(journal.conn(), &id)?;
+            let session = current
+                .root_session_id
+                .clone()
+                .or_else(|| hook::read_session(&project_root).map(|record| record.session_id));
+            let observation = match (&evidence, &session) {
+                (Ok(reader), Some(session)) => {
+                    if current.root_model.is_none() {
+                        let model = reader.root_model(session).ok().flatten();
+                        run::record_root(&mut journal, Some(session), model.as_deref())?;
+                    }
+                    observe(reader, session, &target, &journal)
+                }
+                (Err(reason), _) => {
+                    eprintln!("foxmorrow: no native evidence: {reason}");
+                    None
+                }
+                (_, None) => {
+                    eprintln!(
+                        "foxmorrow: no native evidence: the root session id is unknown; pass --session-id to init"
+                    );
+                    None
+                }
+            };
+            let extra = observation
+                .as_ref()
+                .map(|observed| observed.models.clone())
+                .unwrap_or_default();
+            let families = model_families(&journal, &plugin.profile, &extra)?;
+            let verification = claims::verify(&mut journal, &current, &id, observation, &families)?;
+            print_json(&serde_json::json!({
+                "assignment": verification.assignment_id,
+                "state": verification.state,
+                "claims": verification.claims,
+            }))?;
+            if verification.state != VerificationState::Accepted {
+                return Ok(ExitCode::from(1));
+            }
+        }
+        Command::Finalize {
+            report: id,
+            run: run_id,
+        } => {
+            let project_root = project::for_existing(cli.project, &cwd)?;
+            let (current, mut journal) = run::open_run(&project_root, run_id.as_deref())?;
+            let plugin = Plugin::load(cli.plugin_root)?;
+            let families = model_families(&journal, &plugin.profile, &[])?;
+            print_json(&finalize::finalize(&mut journal, &current, &id, &families)?)?;
+        }
+        Command::Hook { event } => {
+            let mut input = String::new();
+            let _ = std::io::stdin().read_to_string(&mut input);
+            let project_root = std::env::var_os("DEVIN_PROJECT_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|| project::for_init(None, &cwd));
+            match hook::handle(&event, &input, &project_root, |session| {
+                compact_status(&project_root, session)
+            }) {
+                Ok(Some(output)) => println!("{output}"),
+                Ok(None) => {}
+                Err(error) => eprintln!("foxmorrow: hook {event}: {error}"),
+            }
+        }
         Command::Sync {
             plugin: plugin_mode,
             check,
@@ -435,4 +556,72 @@ fn missing_required(catalog: &Catalog, found: &Inventory) -> BTreeMap<String, Ve
 fn print_json(value: &impl Serialize) -> Result<()> {
     println!("{}", serde_json::to_string_pretty(value)?);
     Ok(())
+}
+
+fn open_reader(
+    explicit: Option<PathBuf>,
+    plugin_root: &Path,
+) -> std::result::Result<Reader, String> {
+    let map = SchemaMap::load(plugin_root).map_err(|error| error.to_string())?;
+    let path = reader::locate(
+        explicit,
+        std::env::var_os("FOXMORROW_SESSIONS_DB").map(PathBuf::from),
+        std::env::var_os("DEVIN_SESSIONS_DIR").map(PathBuf::from),
+        &home_dir(),
+    );
+    Reader::open(&path, map).map_err(|error| error.to_string())
+}
+
+fn observe(
+    reader: &Reader,
+    session: &str,
+    target: &Assignment,
+    journal: &Journal,
+) -> Option<ChainObservation> {
+    let found = if target.kind == Kind::Root {
+        reader.root_observation(session)
+    } else {
+        let header = assignment::brief(journal.conn(), &target.id)
+            .ok()
+            .flatten()
+            .and_then(|(_, text)| text.lines().next().map(str::to_string));
+        match (header, &target.profile) {
+            (Some(header), Some(profile)) => reader.find_subagent(
+                session,
+                &ChainQuery {
+                    profile: profile.clone(),
+                    needles: vec![header],
+                },
+            ),
+            _ => Err(Error::NotFound("the recorded brief or profile".into())),
+        }
+    };
+    match found {
+        Ok(observed) => Some(observed),
+        Err(error) => {
+            eprintln!("foxmorrow: no native evidence for {}: {error}", target.id);
+            None
+        }
+    }
+}
+
+fn model_families(journal: &Journal, profile: &Profile, extra: &[String]) -> Result<ModelFamilies> {
+    let mut models = claims::observed_models(journal.conn())?;
+    for entry in assignment::list(journal.conn())? {
+        models.extend(entry.expected_models);
+    }
+    models.extend(extra.iter().cloned());
+    Ok(profile.families_for(models.iter()))
+}
+
+fn compact_status(project_root: &Path, session: Option<&str>) -> Option<String> {
+    let (current, journal) = run::open_run(project_root, None).ok()?;
+    let known = current
+        .root_session_id
+        .clone()
+        .or_else(|| hook::read_session(project_root).map(|record| record.session_id));
+    if session.is_none() || known.as_deref() != session {
+        return None;
+    }
+    serde_json::to_string(&status::status(journal.conn(), &current).ok()?).ok()
 }

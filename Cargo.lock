@@ -211,6 +211,7 @@ dependencies = [
  "clap",
  "foxmorrow-core",
  "foxmorrow-devin",
+ "rusqlite",
  "serde",
  "serde_json",
  "tempfile",
@@ -232,6 +233,7 @@ name = "foxmorrow-devin"
 version = "0.1.0"
 dependencies = [
  "foxmorrow-core",
+ "rusqlite",
  "serde",
  "serde_json",
  "tempfile",

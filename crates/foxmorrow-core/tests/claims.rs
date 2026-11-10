@@ -412,3 +412,66 @@ fn check_evidence_must_be_run_from_the_chain() {
         verified.claims
     );
 }
+
+#[test]
+fn observed_models_collects_accepted_snapshots() {
+    let dir = tempfile::tempdir().unwrap();
+    let (run, mut journal) = new_run(dir.path());
+    accepted_chain(&mut journal, &run);
+    let models: Vec<String> = claims::observed_models(journal.conn())
+        .unwrap()
+        .into_iter()
+        .collect();
+    assert_eq!(
+        models,
+        vec![
+            "gpt-6".to_string(),
+            "opus-5".to_string(),
+            "swe-2-high".to_string()
+        ]
+    );
+}
+
+#[test]
+fn report_call_recognizes_platform_launchers() {
+    let cases = [
+        (
+            "bin/foxmorrow report -a a-01 <<'JSON'",
+            ClaimState::Verified,
+        ),
+        (
+            "C:\\plugin\\bin\\foxmorrow.cmd report -a a-01",
+            ClaimState::Verified,
+        ),
+        (
+            "\"/opt/fox/foxmorrow.exe\" report -a a-01",
+            ClaimState::Verified,
+        ),
+        ("notfoxmorrow report -a a-01", ClaimState::Failed),
+    ];
+    for (command, expected) in cases {
+        let dir = tempfile::tempdir().unwrap();
+        let (run, mut journal) = new_run(dir.path());
+        let author = assignment::create(
+            &mut journal,
+            &run,
+            spec("backend-worker", Kind::Author, "swe-2-high", &[]),
+        )
+        .unwrap();
+        report::submit(&mut journal, &run, &author.id, &passed_report(&[])).unwrap();
+        let mut observed = observation(&author, "agent-1", "swe-2-high");
+        observed.tool_calls = vec![ToolCall {
+            id: "c".into(),
+            name: "exec".into(),
+            command: Some(command.into()),
+            exit_code: Some(0),
+        }];
+        let verification =
+            claims::verify(&mut journal, &run, &author.id, Some(observed), &families()).unwrap();
+        assert_eq!(
+            claim_state(&verification.claims, "C2"),
+            expected,
+            "{command}"
+        );
+    }
+}

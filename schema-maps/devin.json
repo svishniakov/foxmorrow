@@ -1,0 +1,21 @@
+{
+  "map_version": 1,
+  "tested_devin": ["3000.12.43"],
+  "tables": {
+    "sessions": ["id", "working_directory", "last_activity_at", "main_chain_id"],
+    "message_nodes": ["session_id", "node_id", "parent_node_id", "chat_message"],
+    "tool_call_state": ["session_id", "tool_call_id", "tool_call_json", "tool_call_update_json"],
+    "subagent_heads": ["session_id", "agent_id", "chain_node_id"]
+  },
+  "message": {
+    "role": "/role",
+    "content": "/content",
+    "model": "/metadata/generation_model",
+    "tool_calls": "/tool_calls",
+    "tool_call_id": "/tool_call_id"
+  },
+  "tool_call": { "id": "/id", "name": "/name", "command": "/arguments/command" },
+  "request": { "profile": "/rawInput/profile", "task": "/rawInput/task" },
+  "result": { "exit_code": "/_meta/terminal_exit/exit_code" },
+  "subagent_result_prefix": "Subagent agent_id="
+}

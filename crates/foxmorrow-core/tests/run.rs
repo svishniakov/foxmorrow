@@ -69,3 +69,16 @@ fn root_identity_is_set_once_and_criteria_never_change() {
             .is_err()
     );
 }
+
+#[test]
+fn records_root_identity_once() {
+    let dir = tempfile::tempdir().unwrap();
+    let (_, mut journal) = run::create_run(new_run(dir.path(), vec!["src/".into()])).unwrap();
+    let first = run::record_root(&mut journal, Some("s-1"), Some("claude-opus-5-5-high")).unwrap();
+    assert_eq!(first.root_session_id.as_deref(), Some("s-1"));
+    assert_eq!(first.root_model.as_deref(), Some("claude-opus-5-5-high"));
+    let second = run::record_root(&mut journal, Some("s-2"), Some("other")).unwrap();
+    assert_eq!(second.root_session_id.as_deref(), Some("s-1"));
+    assert_eq!(second.root_model.as_deref(), Some("claude-opus-5-5-high"));
+    assert_eq!(run::record_root(&mut journal, None, None).unwrap(), second);
+}

@@ -116,6 +116,18 @@ pub fn accepted_observation(
     }
 }
 
+pub fn observed_models(conn: &Connection) -> Result<BTreeSet<String>> {
+    let mut statement = conn
+        .prepare("SELECT observation_json FROM verification WHERE observation_json IS NOT NULL")?;
+    let rows = statement.query_map([], |row| row.get::<_, String>(0))?;
+    let mut models = BTreeSet::new();
+    for row in rows {
+        let observed: ChainObservation = serde_json::from_str(&row?)?;
+        models.extend(observed.models);
+    }
+    Ok(models)
+}
+
 pub(crate) fn evaluate_recorded(
     conn: &Connection,
     run: &Run,
@@ -429,7 +441,7 @@ fn invokes(command: &str, subcommand: &str, assignment_id: &str) -> bool {
     let words: Vec<&str> = command.split_whitespace().collect();
     let calls = words
         .windows(2)
-        .any(|pair| pair[0].ends_with("foxmorrow") && pair[1] == subcommand);
+        .any(|pair| is_foxmorrow(pair[0]) && pair[1] == subcommand);
     let names = words
         .windows(2)
         .any(|pair| matches!(pair[0], "-a" | "--assignment") && pair[1] == assignment_id);
@@ -443,4 +455,13 @@ fn has_token(text: &str, token: &str) -> bool {
 
 fn unquoted(text: &str) -> String {
     text.chars().filter(|c| *c != '"' && *c != '\'').collect()
+}
+
+fn is_foxmorrow(word: &str) -> bool {
+    let name = word
+        .trim_matches(|c| c == '"' || c == '\'')
+        .rsplit(['/', '\\'])
+        .next()
+        .unwrap_or("");
+    matches!(name, "foxmorrow" | "foxmorrow.exe" | "foxmorrow.cmd")
 }
