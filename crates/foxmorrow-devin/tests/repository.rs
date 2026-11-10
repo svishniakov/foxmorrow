@@ -257,3 +257,75 @@ fn every_document_type_has_parsable_criteria() {
         assert!(found.len() >= 4, "{kind} has {} criteria", found.len());
     }
 }
+
+const TARGETS: [&str; 5] = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
+    "x86_64-pc-windows-msvc",
+];
+
+fn json_file(relative: &str) -> serde_json::Value {
+    serde_json::from_str(&std::fs::read_to_string(root().join(relative)).unwrap()).unwrap()
+}
+
+#[test]
+fn versions_agree_across_the_plugin() {
+    let cargo = std::fs::read_to_string(root().join("Cargo.toml")).unwrap();
+    let version = cargo
+        .lines()
+        .skip_while(|line| *line != "[workspace.package]")
+        .find_map(|line| line.strip_prefix("version = \""))
+        .map(|rest| rest.trim_end_matches('"').to_string())
+        .unwrap();
+    let manifest = json_file(".devin-plugin/plugin.json");
+    let checksums = json_file("checksums.json");
+    assert_eq!(manifest["name"], "foxmorrow");
+    assert_eq!(manifest["version"], version.as_str());
+    assert_eq!(checksums["version"], version.as_str());
+    assert_eq!(checksums["repository"], "svishniakov/foxmorrow");
+    for (target, sha) in checksums["binaries"].as_object().unwrap() {
+        assert!(
+            TARGETS.contains(&target.as_str()),
+            "unknown target {target}"
+        );
+        let sha = sha.as_str().unwrap();
+        assert!(
+            sha.len() == 64 && sha.chars().all(|c| c.is_ascii_hexdigit()),
+            "{target}: {sha}"
+        );
+    }
+}
+
+#[test]
+fn hooks_call_the_loader_for_handled_events() {
+    let hooks = json_file("hooks.json");
+    let events = hooks.as_object().unwrap();
+    let names: Vec<&str> = events.keys().map(String::as_str).collect();
+    assert_eq!(names, vec!["PostCompaction", "UserPromptSubmit"]);
+    for (event, entries) in events {
+        for entry in entries.as_array().unwrap() {
+            for hook in entry["hooks"].as_array().unwrap() {
+                assert_eq!(hook["type"], "command");
+                assert_eq!(
+                    hook["command"],
+                    format!("${{PLUGIN_ROOT}}/bin/foxmorrow hook {event}")
+                );
+            }
+        }
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn launchers_are_executable() {
+    use std::os::unix::fs::PermissionsExt;
+    for relative in ["bin/foxmorrow", "scripts/write-checksums.sh"] {
+        let mode = std::fs::metadata(root().join(relative))
+            .unwrap()
+            .permissions()
+            .mode();
+        assert!(mode & 0o111 != 0, "{relative} is not executable");
+    }
+}

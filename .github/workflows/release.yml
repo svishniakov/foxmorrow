@@ -1,0 +1,71 @@
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, musl: true }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm, musl: true }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest, exe: .exe }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check that the tag matches the crate version
+        shell: bash
+        run: |
+          version=$(sed -n '/^\[workspace.package\]/,/^\[/s/^version = "\(.*\)"/\1/p' Cargo.toml)
+          test "v$version" = "$GITHUB_REF_NAME"
+      - if: matrix.musl
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: rustup toolchain install && rustup target add ${{ matrix.target }}
+      - run: cargo build --release --locked -p foxmorrow --target ${{ matrix.target }}
+      - shell: bash
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/foxmorrow${{ matrix.exe }} dist/foxmorrow-${{ matrix.target }}${{ matrix.exe }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: foxmorrow-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Write checksums
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          sh scripts/write-checksums.sh "$version" "$GITHUB_REPOSITORY" dist > checksums.json
+          test "$(grep -c '"[a-z0-9_-]*": "[0-9a-f]\{64\}"' checksums.json)" -eq 5
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* checksums.json --title "$GITHUB_REF_NAME" --notes "foxmorrow $GITHUB_REF_NAME"
+      - name: Commit checksums to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add checksums.json
+          git commit -m "Record checksums for $GITHUB_REF_NAME"
+          git push origin HEAD:main

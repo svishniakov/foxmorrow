@@ -1,0 +1,8 @@
+{
+  "UserPromptSubmit": [
+    { "matcher": "", "hooks": [{ "type": "command", "command": "${PLUGIN_ROOT}/bin/foxmorrow hook UserPromptSubmit" }] }
+  ],
+  "PostCompaction": [
+    { "matcher": "", "hooks": [{ "type": "command", "command": "${PLUGIN_ROOT}/bin/foxmorrow hook PostCompaction" }] }
+  ]
+}

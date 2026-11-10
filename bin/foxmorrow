@@ -1,0 +1,63 @@
+#!/bin/sh
+set -eu
+
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+root=$(dirname -- "$here")
+FOXMORROW_PLUGIN_ROOT=$root
+export FOXMORROW_PLUGIN_ROOT
+
+if [ -n "${FOXMORROW_DEV_BINARY:-}" ]; then
+  exec "$FOXMORROW_DEV_BINARY" "$@"
+fi
+
+fail() {
+  echo "foxmorrow: $*" >&2
+  exit 2
+}
+
+checksums="$root/checksums.json"
+[ -f "$checksums" ] || fail "missing $checksums"
+field() {
+  sed -n "s/.*\"$1\": *\"\([^\"]*\)\".*/\1/p" "$checksums" | head -n 1
+}
+
+case "$(uname -s)-$(uname -m)" in
+  Darwin-arm64) target=aarch64-apple-darwin ;;
+  Darwin-x86_64) target=x86_64-apple-darwin ;;
+  Linux-x86_64) target=x86_64-unknown-linux-musl ;;
+  Linux-aarch64 | Linux-arm64) target=aarch64-unknown-linux-musl ;;
+  *) fail "unsupported platform $(uname -s) $(uname -m)" ;;
+esac
+
+version=$(field version)
+repository=$(field repository)
+expected=$(field "$target")
+[ -n "$expected" ] || fail "no released binary for $target in version $version; run devin plugins update or wait for the release"
+
+cache="${XDG_CACHE_HOME:-$HOME/.cache}/foxmorrow/$version/$target"
+binary="$cache/foxmorrow"
+if [ ! -x "$binary" ]; then
+  mkdir -p "$cache"
+  partial="$cache/foxmorrow.download.$$"
+  trap 'rm -f "$partial"' EXIT INT TERM
+  base="${FOXMORROW_RELEASE_BASE:-https://github.com/$repository/releases/download}"
+  url="$base/v$version/foxmorrow-$target"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" -o "$partial" || fail "download failed: $url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$partial" "$url" || fail "download failed: $url"
+  else
+    fail "download failed: neither curl nor wget is available"
+  fi
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual=$(sha256sum "$partial" | cut -d ' ' -f 1)
+  else
+    actual=$(shasum -a 256 "$partial" | cut -d ' ' -f 1)
+  fi
+  [ "$actual" = "$expected" ] || fail "checksum mismatch for $url: expected $expected, got $actual"
+  chmod +x "$partial"
+  mv "$partial" "$binary"
+  trap - EXIT INT TERM
+fi
+
+exec "$binary" "$@"
