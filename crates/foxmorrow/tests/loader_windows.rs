@@ -48,7 +48,12 @@ fn downloads_verifies_and_runs_on_windows() {
 
     write(&"0".repeat(64));
     let refused = run();
-    assert_eq!(refused.status.code(), Some(2));
+    assert_eq!(
+        refused.status.code(),
+        Some(2),
+        "{}",
+        String::from_utf8_lossy(&refused.stderr)
+    );
     assert!(String::from_utf8_lossy(&refused.stderr).contains("checksum mismatch"));
 
     write(&sha);
