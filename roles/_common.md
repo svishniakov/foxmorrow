@@ -1,6 +1,6 @@
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

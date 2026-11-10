@@ -4,7 +4,7 @@ description: "Senior architecture subagent resolving disputed ADR and Implementa
 model: claude-opus-5-5-max
 ---
 
-foxmorrow-role-sha256: 290bb5e6cc3b7e13e053d99b0d6a26474e90fdb18cf808472a325217ef6f878f
+foxmorrow-role-sha256: 9ba73ce06209d02498ac25463eb76c809365dff004edc319c56c223c13acb4c9
 
 # supervising-architect
 
@@ -43,7 +43,7 @@ For work in a foxmorrow run, return one report with the cause, evidence, chosen 
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

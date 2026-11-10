@@ -20,7 +20,7 @@ allowed-tools:
   - mcp_read_resource
 ---
 
-foxmorrow-role-sha256: b359897fbe78a86ac08e8753fe3826d2a21eb3ced3897d09a64dbc859c465a42
+foxmorrow-role-sha256: 967e8eb4a29a09612ef465d0ae4239ee9f9ea35f8abe68fbb7ad61acbd49c913
 
 # qa-verifier
 
@@ -91,7 +91,7 @@ For work in a foxmorrow run, use the report shape in `references/contract.md` wi
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

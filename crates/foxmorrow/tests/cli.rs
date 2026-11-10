@@ -29,6 +29,11 @@ impl Setup {
         write(plugin, "schema-maps/devin.json", SCHEMA_MAP);
         write(
             plugin,
+            "skills/fox/references/doc-flow.md",
+            "# Doc Flow\n\n## PRD\n\n### PRD acceptance criteria\n\n- Scope is coherent\n- Status reflects facts\n\n## BRD\n\n### BRD acceptance criteria\n\n- Problem is stated\n",
+        );
+        write(
+            plugin,
             "templates/brief.en.md",
             "Role: {{role}} Profile: {{profile}} role-sha256 {{role_sha256}}\nMissing:\n{{missing_skills}}\nGoal: {{goal}}\nfoxmorrow report -a {{assignment_id}}\n",
         );
@@ -681,4 +686,153 @@ fn hooks_record_the_session_and_report_state() {
     let broken = setup.run(&["hook", "UserPromptSubmit"], Some("not json"));
     assert!(broken.status.success() && broken.stdout.is_empty());
     assert!(String::from_utf8_lossy(&broken.stderr).contains("hook UserPromptSubmit"));
+}
+
+fn document_text(status: &str, based_on: &str, body: &str) -> String {
+    format!("# Doc\n\nDocument status: {status}\nBased on: {based_on}\n\n{body}\n")
+}
+
+#[test]
+fn init_plan_requires_an_approved_chain() {
+    let setup = Setup::new();
+    let root = setup.project.path();
+    write(
+        root,
+        "docs/prd.md",
+        &document_text("approved", "", "## Scope\n\n- health"),
+    );
+    write(
+        root,
+        "docs/plan.md",
+        &document_text(
+            "approved",
+            "[prd](prd.md)",
+            "## Критерии приёмки\n\n- Health returns 200\n- Tests pass",
+        ),
+    );
+    let init = json(&setup.run(&["init", "--plan", "docs/plan.md", "--paths", "src/"], None));
+    assert_eq!(init["criteria"][1]["text"], "Tests pass");
+    assert_eq!(
+        json(&setup.run(&["status"], None))["criteria_path"],
+        "docs/plan.md"
+    );
+
+    write(
+        root,
+        "docs/prd.md",
+        &document_text("draft", "", "## Open questions\n\n- Which port?"),
+    );
+    let refused = setup.run(&["init", "--plan", "docs/plan.md", "--paths", "src/"], None);
+    failure(&refused, "prd.md has status draft");
+    assert!(String::from_utf8_lossy(&refused.stderr).contains("prd.md has open questions"));
+
+    write(
+        root,
+        "docs/en.md",
+        &document_text("approved", "", "## Acceptance criteria\n\n- Works"),
+    );
+    assert_eq!(
+        json(&setup.run(&["init", "--plan", "docs/en.md", "--paths", "src/"], None))["criteria"][0]
+            ["text"],
+        "Works"
+    );
+    write(
+        root,
+        "docs/none.md",
+        &document_text("approved", "", "## Notes\n\n- nothing"),
+    );
+    failure(
+        &setup.run(&["init", "--plan", "docs/none.md", "--paths", "src/"], None),
+        "Критерии приёмки",
+    );
+}
+
+#[test]
+fn init_doc_uses_type_criteria_and_checks_the_basis() {
+    let setup = Setup::new();
+    let root = setup.project.path();
+    let brd = json(&setup.run(&["init", "--doc", "brd", "--paths", "docs/brd.md"], None));
+    assert_eq!(brd["criteria"][0]["text"], "Problem is stated");
+
+    failure(
+        &setup.run(&["init", "--doc", "prd", "--paths", "docs/prd.md"], None),
+        "--based-on",
+    );
+    write(root, "docs/brd.md", &document_text("draft", "", "text"));
+    failure(
+        &setup.run(
+            &[
+                "init",
+                "--doc",
+                "prd",
+                "--based-on",
+                "docs/brd.md",
+                "--paths",
+                "docs/prd.md",
+            ],
+            None,
+        ),
+        "has status draft",
+    );
+    write(root, "docs/brd.md", &document_text("approved", "", "text"));
+    let prd = json(&setup.run(
+        &[
+            "init",
+            "--doc",
+            "prd",
+            "--based-on",
+            "docs/brd.md",
+            "--paths",
+            "docs/prd.md",
+        ],
+        None,
+    ));
+    assert_eq!(prd["criteria"][0]["text"], "Scope is coherent");
+    let status = json(&setup.run(&["status"], None));
+    assert!(
+        status["criteria_path"]
+            .as_str()
+            .unwrap()
+            .ends_with("skills/fox/references/doc-flow.md")
+    );
+}
+
+#[test]
+fn init_needs_exactly_one_criteria_source() {
+    let setup = Setup::new();
+    assert_eq!(
+        setup.run(&["init", "--paths", "src/"], None).status.code(),
+        Some(2)
+    );
+    let both = setup.run(
+        &[
+            "init",
+            "--criteria",
+            "task.md#Критерии приёмки",
+            "--doc",
+            "brd",
+            "--paths",
+            "src/",
+        ],
+        None,
+    );
+    assert_eq!(both.status.code(), Some(2));
+    assert_eq!(
+        setup
+            .run(
+                &[
+                    "init",
+                    "--based-on",
+                    "x.md",
+                    "--criteria",
+                    "task.md#Критерии приёмки",
+                    "--paths",
+                    "src/"
+                ],
+                None
+            )
+            .status
+            .code(),
+        Some(2)
+    );
 }

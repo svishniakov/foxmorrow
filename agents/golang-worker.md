@@ -4,7 +4,7 @@ description: "Go implementation subagent for scoped Go services, Kafka producers
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 585be946fb8dbf2d9b486c32fa23c67bcd953cc681887ae9dba21e07010018e0
+foxmorrow-role-sha256: c1bd77b175cd66396aedbf994c084580ac125374ffb7b7060e07b431ebd3b798
 
 # golang-worker
 
@@ -54,7 +54,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

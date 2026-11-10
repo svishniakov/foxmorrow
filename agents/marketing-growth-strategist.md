@@ -4,7 +4,7 @@ description: "Marketing and growth strategy subagent for business ideas, GTM, po
 model: claude-opus-5-5-high
 ---
 
-foxmorrow-role-sha256: c76e33da47cdf96995ab3cd67fbe1d3bee17beafdb9272d47f302593c28d49c3
+foxmorrow-role-sha256: c28abc39866d8df250adc41f03a5982b3f67a7b98aa991d396220993923de961
 
 # marketing-growth-strategist
 
@@ -56,7 +56,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

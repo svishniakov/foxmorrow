@@ -4,7 +4,7 @@ description: "Product subagent owning PRD creation and substantive revision, coh
 model: claude-opus-5-5-high
 ---
 
-foxmorrow-role-sha256: f543e39741bb067b78becd4b6217c2f8f4c3953b1b04f868cef2b10d1318e24b
+foxmorrow-role-sha256: 239913d7f85c3d146d00eeb144219466f0136a663e7b81c964b2ad3207257587
 
 # product-manager
 
@@ -62,7 +62,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

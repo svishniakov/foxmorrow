@@ -1,6 +1,7 @@
 Role: {{role}}   Profile: {{profile}}   role-sha256 {{role_sha256}}
 Expected model: {{expected_models}}
 References: {{references_dir}}
+CLI: {{foxmorrow}}
 
 Skills to apply:
 {{skills}}
@@ -28,11 +29,11 @@ Missing required skills:
 
 - Change only the allowed paths. Do not commit, push, publish or deploy.
 - Run every check through:
-  foxmorrow check -a {{assignment_id}} -- <command>
+  {{foxmorrow}} check -a {{assignment_id}} -- <command>
 - Finish with exactly one report:
 
 ```sh
-foxmorrow report -a {{assignment_id}} <<'JSON'
+{{foxmorrow}} report -a {{assignment_id}} <<'JSON'
 {"summary": "...", "status": "completed", "outcome": "passed",
  "criteria": {"ac-1": {"status": "passed", "reason": "...", "evidence": ["chk-001"]}},
  "evidence": ["chk-001"]}

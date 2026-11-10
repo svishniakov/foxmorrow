@@ -5,11 +5,12 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use foxmorrow_core::assignment::{self, Assignment, BriefDraft, NewAssignment};
 use foxmorrow_core::brief::{self, BriefInput, ContextItem};
 use foxmorrow_core::catalog::Catalog;
 use foxmorrow_core::claims::{self, ChainObservation, ModelFamilies};
+use foxmorrow_core::document;
 use foxmorrow_core::error::invalid;
 use foxmorrow_core::finalize;
 use foxmorrow_core::journal::Journal;
@@ -41,8 +42,14 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     Init {
-        #[arg(long)]
-        criteria: String,
+        #[arg(long, conflicts_with_all = ["plan", "doc"])]
+        criteria: Option<String>,
+        #[arg(long, conflicts_with = "doc")]
+        plan: Option<PathBuf>,
+        #[arg(long, value_enum)]
+        doc: Option<DocType>,
+        #[arg(long = "based-on", num_args = 1..)]
+        based_on: Vec<PathBuf>,
         #[arg(long = "paths", required = true, num_args = 1..)]
         paths: Vec<String>,
         #[arg(long = "repo")]
@@ -116,6 +123,31 @@ enum Command {
     Doctor,
 }
 
+#[derive(Clone, Copy, ValueEnum)]
+enum DocType {
+    Brd,
+    Adr,
+    Prd,
+    Plan,
+}
+
+impl DocType {
+    fn heading(self) -> &'static str {
+        match self {
+            DocType::Brd => "BRD acceptance criteria",
+            DocType::Adr => "ADR acceptance criteria",
+            DocType::Prd => "PRD acceptance criteria",
+            DocType::Plan => "Plan acceptance criteria",
+        }
+    }
+}
+
+struct CriteriaSource {
+    path: String,
+    heading: String,
+    markdown: String,
+}
+
 struct Plugin {
     root: PathBuf,
     catalog: Catalog,
@@ -148,17 +180,19 @@ fn execute(cli: Cli) -> Result<ExitCode> {
     match cli.command {
         Command::Init {
             criteria: reference,
+            plan,
+            doc,
+            based_on,
             paths,
             repos,
             session_id,
         } => {
             let root = project::for_init(cli.project, &cwd);
             let plugin = Plugin::load(cli.plugin_root)?;
+            let source = criteria_source(&root, &plugin.root, reference, plan, doc, &based_on)?;
             let project_profile = ProjectProfile::load(&root)?;
             let found = inventory(&root);
             let skills_summary = missing_required(&plugin.catalog, &found);
-            let (file, heading) = criteria::split_reference(&reference)?;
-            let markdown = std::fs::read_to_string(root.join(file))?;
             let repos = if repos.is_empty() {
                 vec![root.clone()]
             } else {
@@ -188,9 +222,9 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             };
             let (created, mut journal) = run::create_run(NewRun {
                 project_root: root,
-                criteria_path: file.to_string(),
-                criteria_heading: heading.to_string(),
-                criteria_markdown: markdown,
+                criteria_path: source.path,
+                criteria_heading: source.heading,
+                criteria_markdown: source.markdown,
                 allowed_paths: paths,
                 baselines,
                 root_session_id: session,
@@ -299,6 +333,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
                 .display()
                 .to_string();
             let language = plugin.profile.brief_language.clone();
+            let cli_path = foxmorrow_cli(&plugin.root).display().to_string();
             let (created, text) = assignment::create_with_brief(
                 &mut journal,
                 &current,
@@ -320,6 +355,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
                             run: &current,
                             assignment: draft,
                             references_dir: &references,
+                            foxmorrow: &cli_path,
                             skills: &apply,
                             missing_skills: &missing,
                             goal: &goal,
@@ -624,4 +660,78 @@ fn compact_status(project_root: &Path, session: Option<&str>) -> Option<String> 
         return None;
     }
     serde_json::to_string(&status::status(journal.conn(), &current).ok()?).ok()
+}
+
+fn foxmorrow_cli(plugin_root: &Path) -> PathBuf {
+    if let Some(path) = std::env::var_os("FOXMORROW_BIN") {
+        return PathBuf::from(path);
+    }
+    let launcher = plugin_root.join("bin").join(if cfg!(windows) {
+        "foxmorrow.cmd"
+    } else {
+        "foxmorrow"
+    });
+    if launcher.is_file() {
+        return launcher;
+    }
+    std::env::current_exe().unwrap_or_else(|_| PathBuf::from("foxmorrow"))
+}
+
+fn criteria_source(
+    root: &Path,
+    plugin_root: &Path,
+    reference: Option<String>,
+    plan: Option<PathBuf>,
+    doc: Option<DocType>,
+    based_on: &[PathBuf],
+) -> Result<CriteriaSource> {
+    if !based_on.is_empty() && doc.is_none() {
+        return invalid("--based-on is used only with --doc");
+    }
+    if let Some(reference) = reference {
+        let (file, heading) = criteria::split_reference(&reference)?;
+        return Ok(CriteriaSource {
+            path: file.to_string(),
+            heading: heading.to_string(),
+            markdown: std::fs::read_to_string(root.join(file))?,
+        });
+    }
+    if let Some(plan) = plan {
+        let path = root.join(&plan);
+        document::check_chain(std::slice::from_ref(&path))?;
+        let markdown = std::fs::read_to_string(&path)?;
+        let Some(heading) = ["Критерии приёмки", "Acceptance criteria"]
+            .into_iter()
+            .find(|heading| criteria::parse_section(&markdown, heading).is_ok())
+        else {
+            return invalid(format!(
+                "{} has no «Критерии приёмки» or «Acceptance criteria» section with list items",
+                plan.display()
+            ));
+        };
+        return Ok(CriteriaSource {
+            path: plan.display().to_string(),
+            heading: heading.to_string(),
+            markdown,
+        });
+    }
+    let Some(doc) = doc else {
+        return invalid("one of --criteria, --plan or --doc is required");
+    };
+    if based_on.is_empty() && !matches!(doc, DocType::Brd) {
+        return invalid("this document type needs --based-on with its approved source documents");
+    }
+    let basis: Vec<PathBuf> = based_on.iter().map(|path| root.join(path)).collect();
+    document::check_chain(&basis)?;
+    let file = plugin_root
+        .join("skills")
+        .join("fox")
+        .join("references")
+        .join("doc-flow.md");
+    Ok(CriteriaSource {
+        markdown: std::fs::read_to_string(&file)
+            .map_err(|_| Error::NotFound(format!("Doc Flow reference {}", file.display())))?,
+        path: file.display().to_string(),
+        heading: doc.heading().to_string(),
+    })
 }

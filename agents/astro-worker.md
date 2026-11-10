@@ -4,7 +4,7 @@ description: "Astro implementation subagent for scoped HTML pages, layouts, comp
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 01258e0192d7e7ce18e32e3f0e6defc0691d9636f6c10c70b4fd900ce7bce138
+foxmorrow-role-sha256: 5c62450c13460f179debfc9341e760657acf42bf643ec25e01a925e366beefec
 
 # astro-worker
 
@@ -61,7 +61,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

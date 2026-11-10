@@ -12,6 +12,8 @@ use crate::state;
 #[derive(Debug, Serialize)]
 pub struct StatusView {
     pub run_id: String,
+    pub criteria_path: String,
+    pub criteria_heading: String,
     pub criteria: Vec<Criterion>,
     pub family_rule: bool,
     pub root_model: Option<String>,
@@ -64,6 +66,8 @@ pub fn status(conn: &Connection, run: &Run) -> Result<StatusView> {
         .optional()?;
     Ok(StatusView {
         run_id: run.id.clone(),
+        criteria_path: run.criteria_path.clone(),
+        criteria_heading: run.criteria_heading.clone(),
         criteria: run.criteria.clone(),
         family_rule: run.family_rule,
         root_model: run.root_model.clone(),

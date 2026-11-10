@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use foxmorrow_core::brief;
 use foxmorrow_core::catalog::{self, Catalog};
+use foxmorrow_core::criteria;
 use foxmorrow_core::model::Kind;
 use foxmorrow_devin::agents;
 use foxmorrow_devin::profile::{Profile, ProjectProfile};
@@ -50,7 +51,8 @@ const FORBIDDEN: [&str; 16] = [
     "implementation-plan-authoring",
 ];
 
-const PLACEHOLDERS: [&str; 13] = [
+const PLACEHOLDERS: [&str; 14] = [
+    "foxmorrow",
     "assignment_id",
     "role",
     "profile",
@@ -163,7 +165,7 @@ fn brief_templates_agree_on_commands_and_placeholders() {
             .lines()
             .map(str::trim)
             .filter(|line| {
-                line.starts_with("foxmorrow ")
+                line.starts_with("{{foxmorrow}} ")
                     || (line.starts_with('{') && !line.starts_with("{{"))
                     || line.starts_with("\"criteria\"")
                     || line.starts_with("\"evidence\"")
@@ -174,4 +176,84 @@ fn brief_templates_agree_on_commands_and_placeholders() {
     let english = commands("en");
     assert_eq!(english.len(), 5);
     assert_eq!(english, commands("ru"));
+}
+
+fn slug(heading: &str) -> String {
+    heading
+        .trim()
+        .to_lowercase()
+        .chars()
+        .filter_map(|c| match c {
+            ' ' => Some('-'),
+            c if c.is_alphanumeric() || c == '-' || c == '_' => Some(c),
+            _ => None,
+        })
+        .collect()
+}
+
+fn anchors(markdown: &str) -> BTreeSet<String> {
+    markdown
+        .lines()
+        .filter_map(|line| {
+            let depth = line.bytes().take_while(|byte| *byte == b'#').count();
+            ((1..=6).contains(&depth))
+                .then(|| line[depth..].trim())
+                .filter(|title| !title.is_empty())
+        })
+        .map(slug)
+        .collect()
+}
+
+#[test]
+fn skill_has_frontmatter_and_existing_references() {
+    let root = root();
+    let skill = std::fs::read_to_string(root.join("skills/fox/SKILL.md")).unwrap();
+    let frontmatter = skill
+        .strip_prefix("---\n")
+        .and_then(|rest| rest.split_once("\n---\n"))
+        .unwrap()
+        .0;
+    assert!(frontmatter.lines().any(|line| line == "name: fox"));
+    assert!(frontmatter.lines().any(|line| {
+        line.strip_prefix("description: ")
+            .is_some_and(|text| !text.trim().is_empty())
+    }));
+    for reference in ["orchestrator.md", "doc-flow.md", "contract.md"] {
+        assert!(
+            skill.contains(&format!("references/{reference}")),
+            "SKILL.md does not link {reference}"
+        );
+        assert!(root.join("skills/fox/references").join(reference).is_file());
+    }
+}
+
+#[test]
+fn role_links_point_to_existing_doc_flow_sections() {
+    let root = root();
+    let doc_flow =
+        anchors(&std::fs::read_to_string(root.join("skills/fox/references/doc-flow.md")).unwrap());
+    for role in ROLES {
+        let text = catalog::role_text(&root, role).unwrap();
+        for (index, _) in text.match_indices("references/doc-flow.md#") {
+            let anchor: String = text[index + "references/doc-flow.md#".len()..]
+                .chars()
+                .take_while(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
+                .collect();
+            assert!(
+                doc_flow.contains(&anchor),
+                "{role} links to a missing doc-flow section #{anchor}"
+            );
+        }
+    }
+}
+
+#[test]
+fn every_document_type_has_parsable_criteria() {
+    let markdown =
+        std::fs::read_to_string(root().join("skills/fox/references/doc-flow.md")).unwrap();
+    for kind in ["BRD", "ADR", "PRD", "Plan"] {
+        let (_, found) =
+            criteria::parse_section(&markdown, &format!("{kind} acceptance criteria")).unwrap();
+        assert!(found.len() >= 4, "{kind} has {} criteria", found.len());
+    }
 }

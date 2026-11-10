@@ -4,7 +4,7 @@ description: "Architecture subagent owning complete ADR and Implementation Plan 
 model: claude-opus-5-5-high
 ---
 
-foxmorrow-role-sha256: 85144a7671b0669b4be67b74b673e0432434d56a7b020fd08aebfb3e0bb31fcd
+foxmorrow-role-sha256: 05a0d239e8b131a2ba1fde668071775504e2622aa2caf53b63331ed2a41d02f6
 
 # architect
 
@@ -52,7 +52,7 @@ Include the guard's actual `model` and selected `profile` (or `null`) briefly in
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

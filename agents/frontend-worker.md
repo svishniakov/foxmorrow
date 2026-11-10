@@ -4,7 +4,7 @@ description: "Frontend execution subagent for scoped UI, React, styling, respons
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 84250ff65689c4d8476a50638f93981e5297eb6342aa3c48c462baa5d9c7ebf1
+foxmorrow-role-sha256: c917ff9e91e57427d4cc92eeb370f280d0f2884cbaa57d981dfdf4ff93e73cc7
 
 # frontend-worker
 
@@ -56,7 +56,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

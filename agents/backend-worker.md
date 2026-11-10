@@ -4,7 +4,7 @@ description: "Backend execution subagent for scoped server, API, database, queue
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: a74b71c96d583b219784ca1b05fec0769f767a34de31e0790c2a862983c9ba0e
+foxmorrow-role-sha256: f658c69084b24d5f53349a6d305c6f524c31dc8d1f099d2f0852cb02d47d826a
 
 # backend-worker
 
@@ -56,7 +56,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

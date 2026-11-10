@@ -4,7 +4,7 @@ description: "iOS execution subagent for scoped SwiftUI, App Intents, simulator,
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: f021a9fe4ef6935e5a1fa7d13f06ef4e9ea7d25c10388a15b22cccb9b1f58033
+foxmorrow-role-sha256: dd041a4e4cfee68f6703d8a007f9b0474e083b9898313d12cbe21f308fc95a4f
 
 # ios-worker
 
@@ -54,7 +54,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

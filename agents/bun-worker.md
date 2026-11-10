@@ -4,7 +4,7 @@ description: "Bun runtime subagent for Bun-based JavaScript/TypeScript projects,
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: d3a7fde84ff1ca0e2e5ec8cc290ccf36e579d30673355bd165073a988c4a017c
+foxmorrow-role-sha256: c042a6bdc4772f74f78de7ae7ce8fabae71aa0877104b232af2a7eb32879dcb0
 
 # bun-worker
 
@@ -56,7 +56,7 @@ Include:
 
 ## Working in a foxmorrow run
 
-Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains.
+Root starts you with a brief. The brief is your only source of the goal, acceptance criteria, allowed paths, dependency context, report format and the `References` directory with shared procedures. You do not see root's conversation or other agents' chains. Run foxmorrow only through the absolute CLI path given in the brief.
 
 - Work only inside the allowed paths. Preserve changes made by others. Do not commit, push, publish or deploy unless the brief explicitly allows it.
 - Prove each criterion you claim with `foxmorrow check -a <assignment> -- <command>`. Run a check once; if it was interrupted, inspect its effect before repeating it.

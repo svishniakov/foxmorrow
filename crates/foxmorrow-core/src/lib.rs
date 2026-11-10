@@ -4,6 +4,7 @@ pub mod brief;
 pub mod catalog;
 pub mod claims;
 pub mod criteria;
+pub mod document;
 pub mod error;
 pub mod finalize;
 pub mod journal;

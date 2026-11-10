@@ -6,7 +6,7 @@ use foxmorrow_core::assignment;
 use foxmorrow_core::brief::{self, BriefInput, ContextItem};
 use foxmorrow_core::model::{Kind, Outcome};
 
-const TEMPLATE: &str = "Role: {{role}} Profile: {{profile}} role-sha256 {{role_sha256}}\nModel: {{expected_models}}\nReferences: {{references_dir}}\nSkills:\n{{skills}}\nMissing:\n{{missing_skills}}\nGoal: {{goal}}\nCriteria ({{criteria_source}}):\n{{criteria}}\nPaths:\n{{allowed_paths}}\nContext:\n{{context}}\nfoxmorrow report -a {{assignment_id}}\n";
+const TEMPLATE: &str = "Role: {{role}} Profile: {{profile}} role-sha256 {{role_sha256}}\nModel: {{expected_models}}\nReferences: {{references_dir}}\nSkills:\n{{skills}}\nMissing:\n{{missing_skills}}\nGoal: {{goal}}\nCriteria ({{criteria_source}}):\n{{criteria}}\nPaths:\n{{allowed_paths}}\nContext:\n{{context}}\n{{foxmorrow}} report -a {{assignment_id}}\n";
 
 fn input_parts(
     dir: &std::path::Path,
@@ -41,6 +41,7 @@ fn fills_every_placeholder() {
             run: &run,
             assignment: &created,
             references_dir: "/plugin/skills/fox/references",
+            foxmorrow: "/plugin/bin/foxmorrow",
             skills: &skills,
             missing_skills: &[],
             goal: "  Add GET /health {{not a placeholder}}  ",
@@ -59,7 +60,7 @@ Goal: Add GET /health {{not a placeholder}}\n\
 Criteria (task.md#Критерии приёмки):\n- ac-1: Первый критерий\n- ac-2: Второй критерий\n\
 Paths:\n- src/\n\
 Context:\n- a-00 architect passed: Plan agreed\n\
-foxmorrow report -a a-01\n"
+/plugin/bin/foxmorrow report -a a-01\n"
     );
 }
 
@@ -74,6 +75,7 @@ fn rejects_broken_templates_and_empty_goals() {
                 run: &run,
                 assignment: &created,
                 references_dir: "/r",
+                foxmorrow: "/plugin/bin/foxmorrow",
                 skills: &[],
                 missing_skills: &[],
                 goal,

@@ -1,6 +1,7 @@
 Роль: {{role}}   Профиль: {{profile}}   role-sha256 {{role_sha256}}
 Ожидаемая модель: {{expected_models}}
 Справочники: {{references_dir}}
+CLI: {{foxmorrow}}
 
 Применяемые skills:
 {{skills}}
@@ -28,11 +29,11 @@
 
 - Меняй только разрешённые пути. Не делай commit, push, публикацию и deploy.
 - Каждую проверку запускай через:
-  foxmorrow check -a {{assignment_id}} -- <command>
+  {{foxmorrow}} check -a {{assignment_id}} -- <command>
 - Заверши работу ровно одним отчётом:
 
 ```sh
-foxmorrow report -a {{assignment_id}} <<'JSON'
+{{foxmorrow}} report -a {{assignment_id}} <<'JSON'
 {"summary": "...", "status": "completed", "outcome": "passed",
  "criteria": {"ac-1": {"status": "passed", "reason": "...", "evidence": ["chk-001"]}},
  "evidence": ["chk-001"]}
