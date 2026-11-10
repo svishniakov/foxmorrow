@@ -30,12 +30,18 @@ if (-not (Test-Path $binary)) {
     $base = if ($env:FOXMORROW_RELEASE_BASE) { $env:FOXMORROW_RELEASE_BASE } else { "https://github.com/$($checksums.repository)/releases/download" }
     $url = "$base/v$version/foxmorrow-$target.exe"
     try {
-        Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $partial
+        (New-Object System.Net.WebClient).DownloadFile($url, $partial)
     } catch {
         Remove-Item -ErrorAction SilentlyContinue $partial
         Fail "download failed: $url"
     }
-    $actual = (Get-FileHash -Algorithm SHA256 $partial).Hash.ToLowerInvariant()
+    $stream = [System.IO.File]::OpenRead($partial)
+    try {
+        $digest = [System.Security.Cryptography.SHA256]::Create().ComputeHash($stream)
+    } finally {
+        $stream.Dispose()
+    }
+    $actual = -join ($digest | ForEach-Object { $_.ToString('x2') })
     if ($actual -ne $expected) {
         Remove-Item -ErrorAction SilentlyContinue $partial
         Fail "checksum mismatch for ${url}: expected $expected, got $actual"
