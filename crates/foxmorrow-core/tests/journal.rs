@@ -1,7 +1,7 @@
 use foxmorrow_core::Error;
 use foxmorrow_core::journal::Journal;
 
-const SEED: &str = "INSERT INTO run VALUES ('r', 1, '/p', 'task.md', 'h', 's', '[]', '[]', '[]', NULL, NULL, 1);
+const SEED: &str = "INSERT INTO run VALUES ('r', 1, '/p', 'task.md', 'h', 's', '[]', '[]', '[]', NULL, NULL, 1, '{}');
 INSERT INTO assignment VALUES ('a-01', 1, 1, 'backend-worker', 'author', 'p', '[]', NULL, NULL, '[]', '[]', NULL);
 INSERT INTO report VALUES ('a-01', 1, 'completed', 'passed', '{}', 'x');";
 

@@ -15,6 +15,7 @@ fn setup(dir: &std::path::Path, kind: Kind) -> (Run, Journal) {
         baselines: Vec::new(),
         root_session_id: None,
         family_rule: true,
+        skills_summary: Default::default(),
     })
     .unwrap();
     let delegated = kind != Kind::Root;

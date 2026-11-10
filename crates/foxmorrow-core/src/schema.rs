@@ -15,7 +15,8 @@ CREATE TABLE run (
     baseline_json TEXT NOT NULL,
     root_session_id TEXT,
     root_model TEXT,
-    family_rule INTEGER NOT NULL
+    family_rule INTEGER NOT NULL,
+    skills_summary_json TEXT NOT NULL
 );
 
 CREATE TABLE assignment (
@@ -31,6 +32,12 @@ CREATE TABLE assignment (
     allowed_paths_json TEXT NOT NULL,
     depends_on_json TEXT NOT NULL,
     previous_id TEXT REFERENCES assignment (id)
+);
+
+CREATE TABLE brief (
+    assignment_id TEXT PRIMARY KEY REFERENCES assignment (id),
+    language TEXT NOT NULL,
+    text TEXT NOT NULL
 );
 
 CREATE TABLE receipt (
@@ -82,6 +89,7 @@ WHEN NEW.id IS NOT OLD.id
   OR NEW.allowed_paths_json IS NOT OLD.allowed_paths_json
   OR NEW.baseline_json IS NOT OLD.baseline_json
   OR NEW.family_rule IS NOT OLD.family_rule
+  OR NEW.skills_summary_json IS NOT OLD.skills_summary_json
   OR (OLD.root_session_id IS NOT NULL AND NEW.root_session_id IS NOT OLD.root_session_id)
   OR (OLD.root_model IS NOT NULL AND NEW.root_model IS NOT OLD.root_model)
 BEGIN SELECT RAISE(ABORT, 'immutable: run'); END;
@@ -116,5 +124,9 @@ BEGIN SELECT RAISE(ABORT, 'run is finalized'); END;
 CREATE TRIGGER report_after_final BEFORE INSERT ON report WHEN EXISTS (SELECT 1 FROM final)
 BEGIN SELECT RAISE(ABORT, 'run is finalized'); END;
 CREATE TRIGGER verification_after_final BEFORE INSERT ON verification WHEN EXISTS (SELECT 1 FROM final)
+BEGIN SELECT RAISE(ABORT, 'run is finalized'); END;
+CREATE TRIGGER brief_no_update BEFORE UPDATE ON brief BEGIN SELECT RAISE(ABORT, 'immutable: brief'); END;
+CREATE TRIGGER brief_no_delete BEFORE DELETE ON brief BEGIN SELECT RAISE(ABORT, 'immutable: brief'); END;
+CREATE TRIGGER brief_after_final BEFORE INSERT ON brief WHEN EXISTS (SELECT 1 FROM final)
 BEGIN SELECT RAISE(ABORT, 'run is finalized'); END;
 "#;

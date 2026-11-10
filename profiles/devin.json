@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "brief_language": "en",
+  "family_rule": true,
+  "tiers": {
+    "worker": "swe-2-high",
+    "analyst": "claude-opus-5-5-high",
+    "verifier": "gpt-6-1-sol-high",
+    "escalation": "gpt-6-astra-xhigh"
+  },
+  "roles": {
+    "supervising-architect": "claude-opus-5-5-max"
+  },
+  "families": [
+    { "family": "swe", "prefixes": ["swe-"] },
+    { "family": "claude", "prefixes": ["claude-"] },
+    { "family": "gpt", "prefixes": ["gpt-"] },
+    { "family": "gemini", "prefixes": ["gemini-"] },
+    { "family": "kimi", "prefixes": ["kimi-"] },
+    { "family": "glm", "prefixes": ["glm-"] },
+    { "family": "grok", "prefixes": ["grok-"] },
+    { "family": "deepseek", "prefixes": ["deepseek-"] },
+    { "family": "nemotron", "prefixes": ["nemotron-"] },
+    { "family": "muse", "prefixes": ["muse-"] }
+  ]
+}

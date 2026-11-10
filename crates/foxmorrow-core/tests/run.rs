@@ -11,6 +11,7 @@ fn new_run(root: &std::path::Path, paths: Vec<String>) -> NewRun {
         baselines: Vec::new(),
         root_session_id: None,
         family_rule: true,
+        skills_summary: Default::default(),
     }
 }
 

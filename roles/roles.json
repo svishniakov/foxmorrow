@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "source": { "repository": "svishniakov/agent-flow", "commit": "882b794" },
+  "roles": {
+    "product-manager": {
+      "description": "Product subagent owning PRD creation and substantive revision, coherent product scope, user outcomes, constraints, and acceptance criteria.",
+      "tier": "analyst", "kind": "author", "tools": "full",
+      "skills": { "required": ["product-manager"], "optional": ["create-prd", "one-pager-prd", "humanizer-ru", "product-management", "job-stories", "opportunity-solution-tree", "prioritization-frameworks", "product-strategy", "product-vision", "user-stories", "value-proposition", "prioritize-assumptions", "outcome-roadmap", "north-star-metric"] }
+    },
+    "architect": {
+      "description": "Architecture subagent owning complete ADR and Implementation Plan creation and revision, technical decisions, boundaries, contracts, risks, and verification criteria.",
+      "tier": "analyst", "kind": "author", "tools": "full",
+      "skills": { "required": ["arch-simplicity-guard"], "optional": ["chief-architect", "golang-architect", "elixir-essentials", "otp-essentials", "ecto-essentials", "phoenix-liveview-essentials", "astro-best-practices", "system-design-doc", "pre-mortem", "sql-queries", "queue-job-processor", "kafka-development", "kafka-producer-consumer", "improve-codebase-architecture", "architecture-decision-records", "humanizer-ru"] }
+    },
+    "supervising-architect": {
+      "description": "Senior architecture subagent resolving disputed ADR and Implementation Plan decisions, recording the chosen approach, and reassessing unresolved architecture problems.",
+      "tier": "escalation", "kind": "author", "tools": "full",
+      "skills": { "required": ["arch-simplicity-guard"], "optional": ["chief-architect", "ai-agents-architect", "improve-codebase-architecture", "architecture-decision-records"] }
+    },
+    "researcher": {
+      "description": "Research subagent for documentation, APIs, SDKs, external sources, local examples, constraints, comparisons, and source-backed findings.",
+      "tier": "worker", "kind": "author", "tools": "verify",
+      "skills": { "required": [], "optional": ["ajtbd-research", "competitor-analysis", "browser-use", "browser-debugging", "market-sizing", "seo-audit"] }
+    },
+    "documenter": {
+      "description": "Documentation subagent for technical specifications, task records, review sections, lessons, release notes, README work, and project documentation outside PRD, ADR and Implementation Plan authorship.",
+      "tier": "analyst", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["markdown-documentation", "copy-editing", "grammar-check", "technical-writer", "readme-standards", "release-notes", "humanizer-ru", "software-localisation", "system-design-doc"] }
+    },
+    "ai-slops-hunter": {
+      "description": "AI slop cleanup subagent for text, code, UI, docs, tests, and generated artifacts. Bans hyphens and dashes only in user facing prose and preserves technical syntax.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": ["ai-slops-hunter"], "optional": ["humanize-ts", "english-humanizer", "humanize-text", "copy-editing", "grammar-check", "code-review-excellence", "accessibility", "agent-governance", "ai-agents-architect"] }
+    },
+    "marketing-growth-strategist": {
+      "description": "Marketing and growth strategy subagent for business ideas, GTM, positioning, launch, campaigns, SEO, paid ads, growth loops, sales enablement, and promotion strategy.",
+      "tier": "analyst", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["gtm-strategy", "gtm-motions", "launch-strategy", "business-model", "growth-loops", "content-strategy", "email-sequence", "cold-email", "ai-seo", "brand-identity", "brand-guidelines", "ideal-customer-profile", "competitive-battlecard", "cohort-analysis", "ab-test-analysis", "customer-journey-map", "kpi-dashboard-design"] }
+    },
+    "rag-retrieval-engineer": {
+      "description": "Retrieval-first LLM/RAG engineer for semantic search, chunking, embeddings, reranking, vector stores, graph databases, GraphRAG, and retrieval quality evaluation.",
+      "tier": "analyst", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["rag-implementation", "rag-retrieval", "evaluate-rag", "chunking-strategy", "embedding-strategies", "hybrid-search-implementation", "aliyun-qwen-rerank", "knowledge-graph-builder", "knowledge-graph", "graphrag-patterns", "sql-queries", "system-design-doc", "test-scenarios"] }
+    },
+    "astro-worker": {
+      "description": "Astro implementation subagent for scoped HTML pages, layouts, components, styling, routing, content collections, assets, selective hydration, and build checks from an approved plan and applicable design.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": ["astro", "astro-best-practices"], "optional": ["application-quality-assurance", "test-scenarios"] }
+    },
+    "backend-worker": {
+      "description": "Backend execution subagent for scoped server, API, database, queue, integration, auth, or service changes from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["bullmq-specialist", "sql-queries", "queue-job-processor", "rag-implementation", "application-quality-assurance", "test-scenarios"] }
+    },
+    "bun-worker": {
+      "description": "Bun runtime subagent for Bun-based JavaScript/TypeScript projects, scripts, tests, dev servers, package management, lockfiles, and Node/npm-to-Bun migration.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["bun", "bun-dev", "test-scenarios", "application-quality-assurance"] }
+    },
+    "devops-worker": {
+      "description": "DevOps implementation subagent for scoped CI/CD pipelines, web application builds and deployments, environment configuration, release automation, rollback, and deployment verification from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["github-actions-templates", "deployment-pipeline-design", "gha-security-review", "docker-expert", "application-quality-assurance", "test-scenarios"] }
+    },
+    "elixir-phoenix-worker": {
+      "description": "Elixir and Phoenix implementation subagent for scoped domain logic, APIs, LiveView, Ecto persistence and migrations, OTP processes, Mix tooling, and tests from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": ["elixir-essentials"], "optional": ["otp-essentials", "ecto-essentials", "phoenix-liveview-essentials", "application-quality-assurance", "test-scenarios"] }
+    },
+    "frontend-worker": {
+      "description": "Frontend execution subagent for scoped UI, React, styling, responsive behavior, and client-state changes from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["frontend-responsive-ui", "frontend-engineer", "frontend-ui-ux-engineer", "webapp-testing"] }
+    },
+    "golang-worker": {
+      "description": "Go implementation subagent for scoped Go services, Kafka producers/consumers, CLIs, packages, concurrency, tests, modules, and idiomatic refactors from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["application-quality-assurance", "golang-code-style", "golang-lint", "golang-modernize", "kafka-development", "kafka-producer-consumer", "test-scenarios"] }
+    },
+    "ios-worker": {
+      "description": "iOS execution subagent for scoped SwiftUI, App Intents, simulator, HIG, and Apple-platform implementation tasks from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["apple-hig-designer", "apple-ui-designer"] }
+    },
+    "python-worker": {
+      "description": "Python implementation subagent for scoped backend, CLI, automation, data processing, QA scripts, tests, PDF/RAG utilities, and dependency hygiene from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["application-quality-assurance", "pdf-extraction", "pdf-ocr-skill", "pdf-generator", "rag-implementation", "chunking-strategy", "browser-use", "test-scenarios", "dummy-dataset", "sql-queries", "python-packaging", "python-testing-patterns"] }
+    },
+    "typescript-worker": {
+      "description": "TypeScript/JavaScript implementation subagent for typed app code, Node/Bun/React modules, API clients, contracts, tests, and scoped refactors from an approved plan.",
+      "tier": "worker", "kind": "author", "tools": "full",
+      "skills": { "required": [], "optional": ["react-components", "react-patterns", "bullmq-specialist", "playwright-e2e-testing", "humanize-ts", "test-scenarios"] }
+    },
+    "reviewer": {
+      "description": "Independent reviewer for PRD, ADR and Implementation Plan content, architecture before implementation, and code before QA for correctness, evidence, simplicity, security, and readiness.",
+      "tier": "verifier", "kind": "review", "tools": "verify",
+      "skills": { "required": ["arch-simplicity-guard"], "optional": ["application-quality-assurance", "code-review-excellence", "pre-mortem", "test-scenarios"] }
+    },
+    "qa-verifier": {
+      "description": "QA verification subagent for requirements, PRD, ADR and Implementation Plan readiness, tests, logs, reproduction, browser or simulator checks, and evidence of completed work.",
+      "tier": "verifier", "kind": "qa", "tools": "verify",
+      "skills": { "required": [], "optional": ["qa-requirement-reviewer", "application-quality-assurance", "playwright-e2e-testing", "browser-debugging", "test-scenarios", "webapp-testing", "e2e-testing-patterns"] }
+    },
+    "senior-qa-verifier": {
+      "description": "Senior QA subagent for blocked resolution recovery, acceptance criteria review, test design, edge cases, negative cases, and QA adequacy checks.",
+      "tier": "escalation", "kind": "qa", "tools": "verify",
+      "skills": { "required": [], "optional": ["application-quality-assurance", "test-scenarios", "e2e-testing-patterns"] }
+    }
+  }
+}

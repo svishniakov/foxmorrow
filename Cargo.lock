@@ -210,6 +210,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "foxmorrow-core",
+ "foxmorrow-devin",
  "serde",
  "serde_json",
  "tempfile",
@@ -223,6 +224,16 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "tempfile",
+]
+
+[[package]]
+name = "foxmorrow-devin"
+version = "0.1.0"
+dependencies = [
+ "foxmorrow-core",
+ "serde",
+ "serde_json",
  "tempfile",
 ]
 

@@ -1,5 +1,7 @@
 pub mod assignment;
 pub mod baseline;
+pub mod brief;
+pub mod catalog;
 pub mod claims;
 pub mod criteria;
 pub mod error;

@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use rusqlite::{Connection, params};
@@ -19,6 +20,7 @@ pub struct NewRun {
     pub baselines: Vec<RepoBaseline>,
     pub root_session_id: Option<String>,
     pub family_rule: bool,
+    pub skills_summary: BTreeMap<String, Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -32,6 +34,7 @@ pub struct Run {
     pub criteria: Vec<Criterion>,
     pub allowed_paths: Vec<String>,
     pub family_rule: bool,
+    pub skills_summary: BTreeMap<String, Vec<String>>,
     pub root_session_id: Option<String>,
     pub root_model: Option<String>,
 }
@@ -62,14 +65,15 @@ pub fn create_run(new: NewRun) -> Result<(Run, Journal)> {
         criteria,
         allowed_paths: new.allowed_paths,
         family_rule: new.family_rule,
+        skills_summary: new.skills_summary,
         root_session_id: new.root_session_id,
         root_model: None,
     };
     let baseline_json = serde_json::to_string(&new.baselines)?;
     journal.write(|tx| {
         tx.execute(
-            "INSERT INTO run (id, created_ms, project_root, criteria_path, criteria_heading, criteria_sha256, criteria_json, allowed_paths_json, baseline_json, root_session_id, root_model, family_rule)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            "INSERT INTO run (id, created_ms, project_root, criteria_path, criteria_heading, criteria_sha256, criteria_json, allowed_paths_json, baseline_json, root_session_id, root_model, family_rule, skills_summary_json)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
             params![
                 run.id,
                 run.created_ms,
@@ -82,7 +86,8 @@ pub fn create_run(new: NewRun) -> Result<(Run, Journal)> {
                 baseline_json,
                 run.root_session_id,
                 run.root_model,
-                run.family_rule
+                run.family_rule,
+                serde_json::to_string(&run.skills_summary)?
             ],
         )?;
         Ok(())
@@ -116,8 +121,8 @@ pub fn open_run(project_root: &Path, run_id: Option<&str>) -> Result<(Run, Journ
 }
 
 pub fn load_run(conn: &Connection) -> Result<Run> {
-    let (run, criteria_json, paths_json) = conn.query_row(
-        "SELECT id, created_ms, project_root, criteria_path, criteria_heading, criteria_sha256, criteria_json, allowed_paths_json, family_rule, root_session_id, root_model FROM run",
+    let (run, criteria_json, paths_json, skills_json) = conn.query_row(
+        "SELECT id, created_ms, project_root, criteria_path, criteria_heading, criteria_sha256, criteria_json, allowed_paths_json, family_rule, root_session_id, root_model, skills_summary_json FROM run",
         [],
         |row| {
             Ok((
@@ -131,17 +136,20 @@ pub fn load_run(conn: &Connection) -> Result<Run> {
                     criteria: Vec::new(),
                     allowed_paths: Vec::new(),
                     family_rule: row.get(8)?,
+                    skills_summary: BTreeMap::new(),
                     root_session_id: row.get(9)?,
                     root_model: row.get(10)?,
                 },
                 row.get::<_, String>(6)?,
                 row.get::<_, String>(7)?,
+                row.get::<_, String>(11)?,
             ))
         },
     )?;
     Ok(Run {
         criteria: serde_json::from_str(&criteria_json)?,
         allowed_paths: serde_json::from_str(&paths_json)?,
+        skills_summary: serde_json::from_str(&skills_json)?,
         ..run
     })
 }

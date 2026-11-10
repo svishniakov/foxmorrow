@@ -26,6 +26,7 @@ pub fn new_run_with(dir: &Path, family_rule: bool) -> (Run, Journal) {
         baselines: Vec::new(),
         root_session_id: None,
         family_rule,
+        skills_summary: Default::default(),
     })
     .unwrap()
 }

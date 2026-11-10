@@ -6,7 +6,7 @@ use crate::journal::Journal;
 use crate::model::{Kind, Outcome, Status};
 use crate::run::Run;
 use crate::state;
-use crate::util::now_ms;
+use crate::util::{now_ms, sha256_hex};
 
 #[derive(Debug, Clone)]
 pub struct NewAssignment {
@@ -41,12 +41,48 @@ const COLUMNS: &str = "id, seq, created_ms, role, kind, profile, expected_models
 
 type RawAssignment = (Assignment, String, String, String, String);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BriefDraft {
+    pub language: String,
+    pub body: String,
+}
+
 pub fn create(journal: &mut Journal, run: &Run, new: NewAssignment) -> Result<Assignment> {
+    Ok(insert(journal, run, new, |_| Ok(None))?.0)
+}
+
+pub fn create_with_brief(
+    journal: &mut Journal,
+    run: &Run,
+    new: NewAssignment,
+    render: impl FnOnce(&Assignment) -> Result<BriefDraft>,
+) -> Result<(Assignment, String)> {
+    let (created, text) = insert(journal, run, new, |draft| render(draft).map(Some))?;
+    let text = text.ok_or_else(|| Error::Invalid("brief was not rendered".into()))?;
+    Ok((created, text))
+}
+
+pub fn brief(conn: &Connection, id: &str) -> Result<Option<(String, String)>> {
+    Ok(conn
+        .query_row(
+            "SELECT language, text FROM brief WHERE assignment_id = ?1",
+            [id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .optional()?)
+}
+
+fn insert(
+    journal: &mut Journal,
+    run: &Run,
+    new: NewAssignment,
+    render: impl FnOnce(&Assignment) -> Result<Option<BriefDraft>>,
+) -> Result<(Assignment, Option<String>)> {
     validate_shape(run, &new)?;
     journal.write(|tx| {
         validate_links(tx, &new)?;
         let seq: i64 = tx.query_row("SELECT COALESCE(MAX(seq), 0) + 1 FROM assignment", [], |row| row.get(0))?;
-        let created = Assignment {
+        let mut created = Assignment {
             id: format!("a-{seq:02}"),
             seq,
             created_ms: now_ms(),
@@ -59,6 +95,18 @@ pub fn create(journal: &mut Journal, run: &Run, new: NewAssignment) -> Result<As
             allowed_paths: new.allowed_paths,
             depends_on: new.depends_on,
             previous_id: new.previous_id,
+        };
+        let brief = match render(&created)? {
+            Some(draft) => {
+                let digest = sha256_hex(draft.body.as_bytes());
+                let text = format!(
+                    "foxmorrow assignment {} run {} brief-sha256 {digest}\n\n{}",
+                    created.id, run.id, draft.body
+                );
+                created.brief_sha256 = Some(digest);
+                Some((draft.language, text))
+            }
+            None => None,
         };
         tx.execute(
             &format!("INSERT INTO assignment ({COLUMNS}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)"),
@@ -77,7 +125,13 @@ pub fn create(journal: &mut Journal, run: &Run, new: NewAssignment) -> Result<As
                 created.previous_id
             ],
         )?;
-        Ok(created)
+        if let Some((language, text)) = &brief {
+            tx.execute(
+                "INSERT INTO brief (assignment_id, language, text) VALUES (?1, ?2, ?3)",
+                params![created.id, language, text],
+            )?;
+        }
+        Ok((created, brief.map(|(_, text)| text)))
     })
 }
 

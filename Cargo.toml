@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/foxmorrow-core", "crates/foxmorrow"]
+members = ["crates/foxmorrow-core", "crates/foxmorrow-devin", "crates/foxmorrow"]
 
 [workspace.package]
 version = "0.1.0"
@@ -16,3 +16,4 @@ sha2 = "0.11.1"
 clap = { version = "4.6.7", features = ["derive"] }
 tempfile = "3.27.0"
 foxmorrow-core = { path = "crates/foxmorrow-core" }
+foxmorrow-devin = { path = "crates/foxmorrow-devin" }
