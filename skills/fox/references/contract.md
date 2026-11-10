@@ -17,7 +17,7 @@ Each assignment ends with exactly one `foxmorrow report -a <assignment>` call th
   "outcome": "passed",
   "criteria": {"ac-1": {"status": "passed", "reason": "why", "evidence": ["chk-001"]}},
   "evidence": ["chk-001", "<tool call id>"],
-  "resolves": ["a-03"]
+  "resolves": {"a-03": ["ac-1"]}
 }
 ```
 
@@ -26,7 +26,8 @@ Each assignment ends with exactly one `foxmorrow report -a <assignment>` call th
 - `outcome` and each criterion `status` are `passed`, `failed` or `unverified`.
 - `criteria` is required for QA and covers every run criterion; other roles include the criteria they address.
 - `evidence` references `chk-…` receipts of the same assignment, with exit code 0 for passed claims, or IDs of your own tool calls.
-- `resolves` lists earlier negative reports that this report supersedes.
+- `resolves` maps each earlier negative report that this report supersedes to the criterion IDs it now resolves; omit it otherwise.
+- No other fields are accepted.
 - A root stop report adds `reason` and an `unverified` list of criterion IDs.
 
 A submitted report cannot be changed.

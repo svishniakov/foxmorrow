@@ -20,7 +20,7 @@ allowed-tools:
   - mcp_read_resource
 ---
 
-foxmorrow-role-sha256: 967e8eb4a29a09612ef465d0ae4239ee9f9ea35f8abe68fbb7ad61acbd49c913
+foxmorrow-role-sha256: 0828eb6d1b76926d5c2f85d8e84c599b86de34ae9c39fcbd47afa387637ce7e8
 
 # qa-verifier
 
@@ -79,7 +79,7 @@ Assess whether the document can guide execution; do not require future stages to
 
 ## Output Contract
 
-For work in a foxmorrow run, use the report shape in `references/contract.md` with a nonempty string `summary`. Document and product QA include `reviewer: {assignment_id}` and an outcome for every selected criterion. Include your own own inspection from this report's turn. An `unverified` criterion requires a nonempty reason; its evidence may be omitted or an empty array. Any supplied references are still verified. Report-level evidence remains required to establish your actual inspection. A positive report requires every criterion to be `passed` with evidence applicable to the task's result. The journal does not track changes to file or report content.
+For work in a foxmorrow run, use the report shape in `references/contract.md` with a nonempty string `summary`. Document and product QA include an outcome for every selected criterion; the accepted review is linked through the assignment dependencies, not a report field. Include your own inspection from this report's turn. An `unverified` criterion requires a nonempty reason; its evidence may be omitted or an empty array. Any supplied references are still verified. Report-level evidence remains required to establish your actual inspection. A positive report requires every criterion to be `passed` with evidence applicable to the task's result. The journal does not track changes to file or report content.
 
 ## Hard Rules
 
