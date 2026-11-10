@@ -375,15 +375,24 @@ git commit -m "Record Devin stage 0 probe results and sessions.db fixture"
 
 ## Результаты
 
-Заполняется в задаче 9.
+Проба выполнена 10 ноября 2026 года на Devin CLI `3000.12.43 (517d03d73926)`, сессия `dedicated-sherbet`, nonce `42fdbeca`.
 
 | № | Пункт §10 | Результат | Доказательство |
 |---|---|---|---|
-| 1 | `model:` у ролей плагина и проекта; текст роли в системных сообщениях | | |
-| 2 | Признак субагента в hooks | | |
-| 3 | Путь к корню плагина в `hooks.json` | | |
-| 4 | Автообновление плагинов | | |
-| 5 | quarantine у скачанного файла | | |
-| 6 | Признак субагента в OpenTelemetry | | |
-| 7 | Доступные модели | | |
-| 8 | Список skills | | |
+| 1 | `model:` у ролей плагина и проекта; текст роли в системных сообщениях | подтверждено | Все ответы цепочек имеют `generation_model` своей роли: `853de4cc` → `swe-2-medium` (`fox-probe:probe-a`), `edc2836c` → `claude-haiku-5-5-low` (`fox-probe:probe-b`), `f2a9cfff` → `gpt-6-1-sol-low` (проектная `fox-probe-c`). Первое системное сообщение каждой цепочки содержит `foxmorrow-role-sha256: <роль>-42fdbeca`. `rawInput.profile` у `run_subagent` совпадает с профилем, задание сохранено дословно. Exit code `exec`: `0`, `3`, `0` |
+| 2 | Признак субагента в hooks | не подтверждено | Полезная нагрузка `PostToolUse` содержит `hook_event_name`, `prompt_id`, `session_id`, `tool_input`, `tool_name`, `tool_response`, `tool_use_id`. `session_id` у вызовов субагентов тот же, что у root. Но `tool_use_id` совпадает с ID вызова в цепочке `sessions.db`, поэтому авторство устанавливается соединением по `tool_use_id`. Применяется решение §10: авторство C2 и C4 по `sessions.db` |
+| 3 | Путь к корню плагина в `hooks.json` | подтверждено | Сработали `${PLUGIN_ROOT}` и `${CLAUDE_PLUGIN_ROOT}`, абсолютный путь тоже; `./scripts/…` не сработал. В окружении hook есть `PLUGIN_ROOT`, `DEVIN_PLUGIN_ROOT`, `CLAUDE_PLUGIN_ROOT`, `PLUGIN_DATA`, `DEVIN_PROJECT_DIR`, `DEVIN_TRACEPARENT` |
+| 4 | Автообновление плагинов | не проверено локально | `devin plugins install --local file:///…` → `fatal: transport 'file' not allowed`. Проверка переносится в план 005 на репозитории GitHub |
+| 5 | quarantine у скачанного файла | подтверждено для `curl` | `xattr -l` у файла, скачанного `curl`, пуст. Запуск скачанного бинарника проверяется в плане 005 |
+| 6 | Признак субагента в OpenTelemetry | не подтверждено | Ключи атрибутов событий: `session.id`, `prompt.id`, `model`, `tool_use_id` и счётчики; признака субагента нет, события субагента отличаются только `model`. OpenTelemetry не используется |
+| 7 | Доступные модели | подтверждено | `devin models`: 49 семейств, в том числе SWE-2, SWE-2 Flash, Claude Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.x, GPT-6 Astra, GPT-6 Sol, GPT-6.1 Sol/Terra, Gemini 4 Argon, Kimi K3.1 Pro, GLM-5.3, Grok 4.7, DeepSeek V4. Уровень reasoning входит в ID (`-low`, `-medium`, `-high`, `-xhigh`, `-max`). Для правила о семействах доступно больше двух семейств |
+| 8 | Список skills | подтверждено | `devin skills list --json` возвращает массив объектов с `name`, `description`, `triggers`, `provider`, `base_dir`, `display_name`, `warnings`, `errors` |
+
+Отклонения от плана при выполнении:
+
+- CLI видит вход в аккаунт только при запуске с чистым окружением: переменные Devin Desktop (`WINDSURF_*`, `DEVIN_FD_PATH`) мешают найти учётные данные. Все команды выполнялись через `env -i HOME=… PATH=… ~/.local/bin/devin`. Для `foxmorrow` это значит: если hooks или CLI будут вызывать `devin`, окружение Desktop нужно учитывать.
+- `devin -p` отказывается работать в непроверенном каталоге. Пользователь доверил `/tmp/foxmorrow-probe/project` интерактивным запуском. `--config` с `respect_workspace_trust: false` не помог.
+- Схема для fixture взята из `sqlite_master` только с таблицами и индексами: триггеры `message_nodes` ссылаются на FTS-таблицу `message_search`.
+- Обезличивание шире плана: кроме системных сообщений удалены `metadata.extensions` (пути правил и skills пользователя), очищены `sessions.metadata` и `cogs_json`. Поиск `ucnlejumper|svishniakov|polydesk` по fixture пуст.
+
+Fixture: `tests/fixtures/devin-3000.12.43/sessions.db` (100 сообщений, 6 вызовов инструментов, 3 цепочки, миграция схемы 20) и `manifest.json`.

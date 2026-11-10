@@ -1,0 +1,27 @@
+{
+  "devin_version": "3000.12.43",
+  "schema_migration": 20,
+  "session_id": "dedicated-sherbet",
+  "agent_ids": {
+    "probe-a": "853de4cc",
+    "probe-b": "edc2836c",
+    "fox-probe-c": "f2a9cfff"
+  },
+  "profiles": {
+    "probe-a": "fox-probe:probe-a",
+    "probe-b": "fox-probe:probe-b",
+    "fox-probe-c": "fox-probe-c"
+  },
+  "nonce": "42fdbeca",
+  "models": {
+    "probe-a": "swe-2-medium",
+    "probe-b": "claude-haiku-5-5-low",
+    "fox-probe-c": "gpt-6-1-sol-low"
+  },
+  "expected_exit_codes": {
+    "probe-a": 0,
+    "probe-b": 3,
+    "fox-probe-c": 0
+  },
+  "redaction": "system messages without the foxmorrow-role-sha256 marker replaced by <redacted>; metadata.extensions removed; sessions.metadata, cogs_json, workspace_dirs cleared; working_directory=/fixture/project"
+}
