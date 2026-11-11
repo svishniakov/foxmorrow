@@ -35,7 +35,7 @@ impl Setup {
         write(
             plugin,
             "templates/brief.en.md",
-            "Role: {{role}} Profile: {{profile}} role-sha256 {{role_sha256}}\nMissing:\n{{missing_skills}}\nGoal: {{goal}}\nfoxmorrow report -a {{assignment_id}}\n",
+            "Role: {{role}} Profile: {{profile}} role-sha256 {{role_sha256}}\nMissing:\n{{missing_skills}}\nMemory:\n{{memory}}\nGoal: {{goal}}\nfoxmorrow report -a {{assignment_id}}\n",
         );
         assert!(
             Command::new("git")
@@ -834,5 +834,82 @@ fn init_needs_exactly_one_criteria_source() {
             .status
             .code(),
         Some(2)
+    );
+}
+
+#[test]
+fn init_lists_project_memory_and_keeps_runs_out_of_git() {
+    let setup = Setup::new();
+    let root = setup.project.path();
+    write(
+        root,
+        ".foxmorrow/memory/lessons.md",
+        "- [r-1 a-02] Cite only your own receipts.\n",
+    );
+    let init = setup.init();
+    let memory = init["memory"].as_array().unwrap();
+    let listed: Vec<(&str, bool)> = memory
+        .iter()
+        .map(|entry| {
+            (
+                entry["file"].as_str().unwrap(),
+                entry["exists"].as_bool().unwrap(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        listed,
+        vec![
+            (".foxmorrow/memory/todo.md", false),
+            (".foxmorrow/memory/lessons.md", true),
+            (".foxmorrow/memory/notes.md", false),
+        ]
+    );
+    let ignore = root.join(".foxmorrow/.gitignore");
+    assert_eq!(
+        std::fs::read_to_string(&ignore).unwrap(),
+        "runs/\nsession\n"
+    );
+    std::fs::write(&ignore, "custom\n").unwrap();
+    setup.init();
+    assert_eq!(std::fs::read_to_string(&ignore).unwrap(), "custom\n");
+}
+
+#[test]
+fn assign_passes_selected_memory_entries_into_the_brief() {
+    let setup = Setup::new();
+    setup.init();
+    let brief = text(&setup.run(
+        &[
+            "assign",
+            "--role",
+            "backend-worker",
+            "--goal",
+            "g",
+            "--paths",
+            "src/",
+            "--memory",
+            "[r-1 a-02] Cite only receipts of your own assignment.",
+            "[r-1] Tests run with make test.",
+        ],
+        None,
+    ));
+    assert!(brief.contains("Memory:\n- [r-1 a-02] Cite only receipts of your own assignment.\n- [r-1] Tests run with make test.\n"), "{brief}");
+    failure(
+        &setup.run(
+            &[
+                "assign",
+                "--role",
+                "backend-worker",
+                "--goal",
+                "g",
+                "--paths",
+                "src/",
+                "--memory",
+                " ",
+            ],
+            None,
+        ),
+        "--memory",
     );
 }

@@ -20,7 +20,7 @@ allowed-tools:
   - mcp_read_resource
 ---
 
-foxmorrow-role-sha256: 6e88eb57cdccc57894a63bec55521dc5a17c392b57ed621102723c12672436df
+foxmorrow-role-sha256: 16bef0c5dfa066105a9be8338c3eeefb6a2cc9e0482f2ab2c1b9dcd0c415e6ea
 
 # researcher
 
@@ -81,4 +81,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

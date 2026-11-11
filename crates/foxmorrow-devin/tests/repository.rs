@@ -51,7 +51,8 @@ const FORBIDDEN: [&str; 16] = [
     "implementation-plan-authoring",
 ];
 
-const PLACEHOLDERS: [&str; 14] = [
+const PLACEHOLDERS: [&str; 15] = [
+    "memory",
     "foxmorrow",
     "assignment_id",
     "role",
@@ -327,5 +328,22 @@ fn launchers_are_executable() {
             .permissions()
             .mode();
         assert!(mode & 0o111 != 0, "{relative} is not executable");
+    }
+}
+
+#[test]
+fn orchestration_describes_every_memory_file() {
+    let text =
+        std::fs::read_to_string(root().join("skills/fox/references/orchestrator.md")).unwrap();
+    assert!(text.contains("## Project memory"));
+    assert!(
+        text.contains("--memory \"<entry>\""),
+        "orchestrator.md does not tell root to pass memory entries"
+    );
+    for file in ["todo.md", "lessons.md", "notes.md"] {
+        assert!(
+            text.contains(&format!("`{file}`")),
+            "orchestrator.md does not describe {file}"
+        );
     }
 }

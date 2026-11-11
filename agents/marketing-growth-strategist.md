@@ -4,7 +4,7 @@ description: "Marketing and growth strategy subagent for business ideas, GTM, po
 model: claude-opus-5-5-high
 ---
 
-foxmorrow-role-sha256: c28abc39866d8df250adc41f03a5982b3f67a7b98aa991d396220993923de961
+foxmorrow-role-sha256: 0808483a4c3a46dd4e2bf0d1737c76d894ad67b7992a8e1e1d86aac64a1a5e84
 
 # marketing-growth-strategist
 
@@ -66,4 +66,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

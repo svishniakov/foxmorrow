@@ -4,7 +4,7 @@ description: "Astro implementation subagent for scoped HTML pages, layouts, comp
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 5c62450c13460f179debfc9341e760657acf42bf643ec25e01a925e366beefec
+foxmorrow-role-sha256: 7126e3c80022575b4adf73630d953dd3e5a2872155658146e608a335deb6ba70
 
 # astro-worker
 
@@ -71,4 +71,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

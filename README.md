@@ -51,6 +51,10 @@ $fox Fix the login timeout; acceptance criteria are in docs/tasks/login.md#Accep
 
 Documents carry `Document status: draft|approved` and `Based on:` in their header. A document with open questions cannot be approved, and only you approve documents.
 
+## Project memory
+
+Root keeps memory between runs in `.foxmorrow/memory/`: `todo.md` for deferred and unverified work, `lessons.md` for rules confirmed by a rejected check or your correction, `notes.md` for project facts such as build commands. It reads them when a run starts, passes the entries that concern an assignment into its brief with `foxmorrow assign --memory`, and updates the files after `finalize`. Commit `memory/` with the project; `foxmorrow init` adds a `.gitignore` that keeps run journals and the session file out of git. Memory is not evidence: every run proves its own results.
+
 ## Models
 
 Roles have tiers; `profiles/devin.json` maps tiers to Devin models. Override them for one project in `.foxmorrow/profile.json` and run `foxmorrow sync` to generate project roles:

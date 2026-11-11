@@ -98,9 +98,10 @@ docs/                          README, установка, модель угро
   session                      session_id и prompt_id root (записывает hook)
   profile.json                 необязательные переопределения моделей и правила о семействах
   runs/<run_id>/journal.sqlite журнал задачи
-  memory/todo.md
-  memory/lessons.md
-  memory/notes.md
+  memory/todo.md               отложенная и непроверенная работа (ведёт root)
+  memory/lessons.md            правила, подтверждённые отклонённой проверкой или поправкой пользователя
+  memory/notes.md              устойчивые факты о проекте с источником
+  .gitignore                   runs/ и session (создаёт init); memory/ коммитится вместе с проектом
 .devin/agents/fox-<role>.md    проектные роли, только для ролей с переопределённой моделью (создаёт foxmorrow sync)
 ```
 

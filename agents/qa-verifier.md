@@ -20,7 +20,7 @@ allowed-tools:
   - mcp_read_resource
 ---
 
-foxmorrow-role-sha256: 0828eb6d1b76926d5c2f85d8e84c599b86de34ae9c39fcbd47afa387637ce7e8
+foxmorrow-role-sha256: d7f7cc08018ad4b74ba6b526d019f0d6f15564fe68db63ad53081591e2bcd9a4
 
 # qa-verifier
 
@@ -101,4 +101,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

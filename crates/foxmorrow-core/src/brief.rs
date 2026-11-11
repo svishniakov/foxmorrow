@@ -20,6 +20,7 @@ pub struct BriefInput<'a> {
     pub foxmorrow: &'a str,
     pub skills: &'a [String],
     pub missing_skills: &'a [String],
+    pub memory: &'a [String],
     pub goal: &'a str,
     pub context: &'a [ContextItem],
 }
@@ -46,6 +47,7 @@ pub fn render(template: &str, input: &BriefInput<'_>) -> Result<String> {
         ("foxmorrow", input.foxmorrow.to_string()),
         ("skills", list(input.skills.iter().cloned())),
         ("missing_skills", list(input.missing_skills.iter().cloned())),
+        ("memory", list(input.memory.iter().cloned())),
         ("goal", goal.to_string()),
         (
             "criteria_source",

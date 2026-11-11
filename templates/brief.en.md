@@ -25,6 +25,10 @@ Missing required skills:
 
 {{context}}
 
+## Project memory
+
+{{memory}}
+
 ## Rules
 
 - Change only the allowed paths. Do not commit, push, publish or deploy.

@@ -4,7 +4,7 @@ description: "TypeScript/JavaScript implementation subagent for typed app code, 
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 3d524069b565e9dbb7f2d42f1cad43bde9514dad0213d2b9646d844b9b62fc67
+foxmorrow-role-sha256: b97cf99631f138ae53f11574570838c3906f71b8ba0daefe57d59917d4bb67fa
 
 # typescript-worker
 
@@ -65,4 +65,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

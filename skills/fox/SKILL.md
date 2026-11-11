@@ -31,3 +31,4 @@ Then follow [the orchestration procedure](references/orchestrator.md). For docum
 - Do not commit, push, publish or deploy without the user's explicit permission.
 - Set `Document status: approved` only after the user approves the verified document.
 - When a missing decision changes scope or correctness, ask the user instead of guessing.
+- Read the project memory at the start of a run and update it after `finalize`, as `orchestrator.md` describes.

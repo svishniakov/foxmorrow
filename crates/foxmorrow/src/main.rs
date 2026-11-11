@@ -72,6 +72,8 @@ enum Command {
         previous: Option<String>,
         #[arg(long)]
         allow_missing_skills: bool,
+        #[arg(long = "memory", num_args = 1..)]
+        memory: Vec<String>,
         #[arg(long)]
         run: Option<String>,
     },
@@ -148,6 +150,8 @@ struct CriteriaSource {
     markdown: String,
 }
 
+const MEMORY_FILES: [&str; 3] = ["todo.md", "lessons.md", "notes.md"];
+
 struct Plugin {
     root: PathBuf,
     catalog: Catalog,
@@ -220,6 +224,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
                 (Ok(reader), Some(session)) => reader.root_model(session).ok().flatten(),
                 _ => None,
             };
+            let state_dir = run::foxmorrow_dir(&root);
             let (created, mut journal) = run::create_run(NewRun {
                 project_root: root,
                 criteria_path: source.path,
@@ -236,6 +241,19 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             } else {
                 created
             };
+            let ignore = state_dir.join(".gitignore");
+            if !ignore.exists() {
+                std::fs::write(&ignore, "runs/\nsession\n")?;
+            }
+            let memory: Vec<serde_json::Value> = MEMORY_FILES
+                .iter()
+                .map(|name| {
+                    serde_json::json!({
+                        "file": format!(".foxmorrow/memory/{name}"),
+                        "exists": state_dir.join("memory").join(name).is_file(),
+                    })
+                })
+                .collect();
             print_json(&serde_json::json!({
                 "run": created.id,
                 "criteria": created.criteria,
@@ -245,6 +263,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
                 "root_session_id": created.root_session_id,
                 "root_model": created.root_model,
                 "evidence": evidence.as_ref().map_or_else(|reason| format!("unavailable: {reason}"), Reader::source),
+                "memory": memory,
             }))?;
         }
         Command::Assign {
@@ -255,6 +274,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             depends_on,
             previous,
             allow_missing_skills,
+            memory,
             run: run_id,
         } => {
             let project_root = project::for_existing(cli.project, &cwd)?;
@@ -284,6 +304,9 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             let Some(goal) = goal else {
                 return invalid("--goal is required for a delegated assignment");
             };
+            if memory.iter().any(|entry| entry.trim().is_empty()) {
+                return invalid("--memory entries must not be empty");
+            }
             let plugin = Plugin::load(cli.plugin_root)?;
             let project_profile = ProjectProfile::load(&project_root)?;
             let spec = plugin.catalog.role(&role)?.clone();
@@ -358,6 +381,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
                             foxmorrow: &cli_path,
                             skills: &apply,
                             missing_skills: &missing,
+                            memory: &memory,
                             goal: &goal,
                             context: &context,
                         },

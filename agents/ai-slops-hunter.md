@@ -4,7 +4,7 @@ description: "AI slop cleanup subagent for text, code, UI, docs, tests, and gene
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: 07b0b486c00980d23de5f55e636fd20027f169a41369e185ddf00c9f5d006257
+foxmorrow-role-sha256: dce62113a47da1b2a4f0a013f53c367ab1c91cfc593e27d5fb9273395c330a37
 
 # AI Slops Hunter
 
@@ -82,4 +82,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

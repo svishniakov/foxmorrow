@@ -4,7 +4,7 @@ description: "Go implementation subagent for scoped Go services, Kafka producers
 model: swe-2-high
 ---
 
-foxmorrow-role-sha256: c1bd77b175cd66396aedbf994c084580ac125374ffb7b7060e07b431ebd3b798
+foxmorrow-role-sha256: b2cf8dc92f7a42b9dd0076b1fce765535f158f521a9097c6a59ed59f1e22270e
 
 # golang-worker
 
@@ -64,4 +64,5 @@ Root starts you with a brief. The brief is your only source of the goal, accepta
 - If a missing decision materially changes scope or correctness, stop and report `unverified` with the question in `summary`. Root asks the user.
 - Choose the simplest solution that keeps the agreed architecture whole. Do not add abstractions, dependencies, services or scope that the brief does not require.
 - Return findings to root. Do not hand work to other agents yourself.
+- Treat entries under «Project memory» in the brief as rules and facts from earlier runs of this project: follow the lessons, use the notes, and still verify anything you claim in this run. If an entry contradicts what you observe, report the contradiction in `summary`.
 - If the brief lists missing required skills, work without them and state in `summary` which decisions you made without their rules.

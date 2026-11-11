@@ -44,6 +44,7 @@ fn fills_every_placeholder() {
             foxmorrow: "/plugin/bin/foxmorrow",
             skills: &skills,
             missing_skills: &[],
+            memory: &[],
             goal: "  Add GET /health {{not a placeholder}}  ",
             context: &context,
         },
@@ -78,6 +79,7 @@ fn rejects_broken_templates_and_empty_goals() {
                 foxmorrow: "/plugin/bin/foxmorrow",
                 skills: &[],
                 missing_skills: &[],
+                memory: &[],
                 goal,
                 context: &[],
             },
@@ -122,4 +124,30 @@ fn loads_templates_by_language() {
         brief::load_template(dir.path(), "../en"),
         Err(Error::Invalid(_))
     ));
+}
+
+#[test]
+fn renders_project_memory_entries() {
+    let dir = tempfile::tempdir().unwrap();
+    let (run, created) = input_parts(dir.path());
+    let memory = vec!["[r-1 a-02] Cite only receipts of your own assignment.".to_string()];
+    let text = brief::render(
+        "{{assignment_id}}\nMemory:\n{{memory}}\n",
+        &BriefInput {
+            run: &run,
+            assignment: &created,
+            references_dir: "/r",
+            foxmorrow: "/plugin/bin/foxmorrow",
+            skills: &[],
+            missing_skills: &[],
+            memory: &memory,
+            goal: "g",
+            context: &[],
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        text,
+        "a-01\nMemory:\n- [r-1 a-02] Cite only receipts of your own assignment.\n"
+    );
 }
