@@ -1,11 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": "svishniakov/foxmorrow",
-  "binaries": {
-    "aarch64-apple-darwin": "d881448ccbf7f218122b23dc3a9af3e429065b5b5cab0fd85f2f40ceaab4c580",
-    "x86_64-apple-darwin": "dae63101102dca3ffe6cee1b2f052f7cf994bc734824779af6fbfa6fd06cb97f",
-    "x86_64-unknown-linux-musl": "35c50ec2163721758b123c58924d906214f05fec67c36869db34e46a8eb744c1",
-    "aarch64-unknown-linux-musl": "dbe2a99155fcb08f518cbbc44ba75f3fc4c04f6e9418002496cab5bd2ecb27f0",
-    "x86_64-pc-windows-msvc": "6aa96696597ee4584342598d6d8e4090e0be676f5cea4b46d024eb664134f62d"
-  }
+  "binaries": {}
 }
