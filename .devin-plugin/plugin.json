@@ -1,6 +1,6 @@
 {
   "name": "foxmorrow",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Provable multi-agent runs for Devin: role subagents with their own models, a journal of assignments and reports, and acceptance checked against Devin session evidence.",
   "author": { "name": "Sergejs Visnakovs" },
   "homepage": "https://github.com/svishniakov/foxmorrow",
