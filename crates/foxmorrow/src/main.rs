@@ -198,7 +198,7 @@ fn execute(cli: Cli) -> Result<ExitCode> {
             let found = inventory(&root);
             let skills_summary = missing_required(&plugin.catalog, &found);
             let repos = if repos.is_empty() {
-                vec![root.clone()]
+                discover_repos(&root)?
             } else {
                 repos
             };
@@ -758,4 +758,17 @@ fn criteria_source(
         path: file.display().to_string(),
         heading: doc.heading().to_string(),
     })
+}
+
+fn discover_repos(root: &Path) -> Result<Vec<PathBuf>> {
+    if baseline::toplevel(root).is_ok() {
+        return Ok(vec![root.to_path_buf()]);
+    }
+    let mut repos: Vec<PathBuf> = std::fs::read_dir(root)?
+        .flatten()
+        .map(|entry| entry.path())
+        .filter(|path| path.join(".git").exists())
+        .collect();
+    repos.sort();
+    Ok(repos)
 }

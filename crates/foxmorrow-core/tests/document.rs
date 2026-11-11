@@ -107,3 +107,20 @@ fn survives_reference_cycles() {
     );
     assert!(document::check_chain(&[]).unwrap().is_empty());
 }
+
+#[test]
+fn reads_the_russian_status_line() {
+    let status = |line: &str| {
+        document::parse(Path::new("x.md"), &format!("# T\n\n{line}\n\n## Body\n")).status
+    };
+    assert_eq!(
+        status("Статус: черновик новой редакции для ревью."),
+        Some("draft".into())
+    );
+    assert_eq!(
+        status("Статус: утверждён 11 ноября 2026 года."),
+        Some("approved".into())
+    );
+    assert_eq!(status("Статус: Утверждено"), Some("approved".into()));
+    assert_eq!(status("Статус: на ревью"), Some("на".into()));
+}

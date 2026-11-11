@@ -34,6 +34,9 @@ pub fn parse(path: &Path, text: &str) -> Document {
         if let Some(value) = line.strip_prefix("Document status:") {
             status = Some(value.trim().to_lowercase());
         }
+        if let Some(value) = line.strip_prefix("Статус:") {
+            status = Some(russian_status(value));
+        }
         if let Some(value) = line.strip_prefix("Based on:") {
             based_on = links(value)
                 .into_iter()
@@ -151,4 +154,20 @@ fn is_none_marker(line: &str) -> bool {
         .trim_end_matches('.')
         .to_lowercase();
     text.is_empty() || NONE_MARKERS.contains(&text.as_str())
+}
+
+fn russian_status(value: &str) -> String {
+    let word = value
+        .trim()
+        .split(|c: char| !c.is_alphanumeric())
+        .next()
+        .unwrap_or("")
+        .to_lowercase();
+    if word.starts_with("утвержд") {
+        "approved".to_string()
+    } else if word.starts_with("черновик") {
+        "draft".to_string()
+    } else {
+        word
+    }
 }

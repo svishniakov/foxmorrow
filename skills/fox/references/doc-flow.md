@@ -16,6 +16,8 @@ Document status: draft
 Based on: [title](relative/path.md), …
 ```
 
+A Russian status line `Статус: черновик …` or `Статус: утверждён …` is read the same way; only its first word counts. Links in `Based on` may point into other repositories of the same workspace.
+
 The first ADR is based on the BRD, a PRD on the BRD and the ADR, a feature ADR on its PRD, a plan on its PRD and, if present, on the feature ADR. A BRD may have no basis.
 
 ## Document approval

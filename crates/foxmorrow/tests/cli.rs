@@ -913,3 +913,88 @@ fn assign_passes_selected_memory_entries_into_the_brief() {
         "--memory",
     );
 }
+
+#[test]
+fn init_in_a_workspace_records_every_repository() {
+    let setup = Setup::new();
+    let workspace = tempfile::tempdir().unwrap();
+    for repo in ["app-saas", "app-ui"] {
+        let path = workspace.path().join(repo);
+        std::fs::create_dir_all(&path).unwrap();
+        assert!(
+            Command::new("git")
+                .arg("-C")
+                .arg(&path)
+                .args(["init", "-q"])
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
+    std::fs::create_dir_all(workspace.path().join("notes")).unwrap();
+    write(
+        workspace.path(),
+        "task.md",
+        "# Task\n\n## Критерии приёмки\n\n- Both repos change\n",
+    );
+    let project = workspace.path().display().to_string();
+    let init = json(&setup.run(
+        &[
+            "--project",
+            &project,
+            "init",
+            "--criteria",
+            "task.md#Критерии приёмки",
+            "--paths",
+            "app-saas/",
+            "app-ui/",
+        ],
+        None,
+    ));
+    let run = init["run"].as_str().unwrap();
+    let db = workspace
+        .path()
+        .join(".foxmorrow/runs")
+        .join(run)
+        .join("journal.sqlite");
+    let baseline: String = rusqlite::Connection::open(db)
+        .unwrap()
+        .query_row("SELECT baseline_json FROM run", [], |row| row.get(0))
+        .unwrap();
+    assert!(
+        baseline.contains("app-saas") && baseline.contains("app-ui"),
+        "{baseline}"
+    );
+    assert!(!baseline.contains("notes"));
+
+    let empty = tempfile::tempdir().unwrap();
+    write(
+        empty.path(),
+        "task.md",
+        "# Task\n\n## Критерии приёмки\n\n- x\n",
+    );
+    let empty_path = empty.path().display().to_string();
+    let plain = json(&setup.run(
+        &[
+            "--project",
+            &empty_path,
+            "init",
+            "--criteria",
+            "task.md#Критерии приёмки",
+            "--paths",
+            "src/",
+        ],
+        None,
+    ));
+    let plain_db = empty
+        .path()
+        .join(".foxmorrow/runs")
+        .join(plain["run"].as_str().unwrap())
+        .join("journal.sqlite");
+    let plain_baseline: String = rusqlite::Connection::open(plain_db)
+        .unwrap()
+        .query_row("SELECT baseline_json FROM run", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(plain_baseline, "[]");
+    assert!(empty.path().join(".foxmorrow/.gitignore").is_file());
+}

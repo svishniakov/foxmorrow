@@ -49,7 +49,11 @@ $fox Fix the login timeout; acceptance criteria are in docs/tasks/login.md#Accep
 | Write or revise a BRD, ADR, PRD or plan | `foxmorrow init --doc <type> --based-on <documents>` uses the Doc Flow criteria of that type |
 | Any task with written acceptance criteria | `foxmorrow init --criteria <file>#<heading>` |
 
-Documents carry `Document status: draft|approved` and `Based on:` in their header. A document with open questions cannot be approved, and only you approve documents.
+A document header carries `Based on:` and a status line, either `Document status: draft|approved` or `Статус: черновик|утверждён`. When a basis document is not approved, root shows it to you and asks you to approve it first. A document with open questions cannot be approved, and only you approve documents.
+
+## Folders and several repositories
+
+Start `$fox` from the folder you work in; it does not need to be a git repository. foxmorrow keeps its runs, journal and memory in a hidden `.foxmorrow/` folder there. When the folder contains several repositories of one product, `foxmorrow init` also records the git state of every repository one level below it, or only of those passed with `--repo`. One run covers the whole product.
 
 ## Project memory
 
