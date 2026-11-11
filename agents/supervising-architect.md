@@ -4,7 +4,7 @@ description: "Senior architecture subagent resolving disputed ADR and Implementa
 model: claude-opus-5-5-max
 ---
 
-foxmorrow-role-sha256: 9ba73ce06209d02498ac25463eb76c809365dff004edc319c56c223c13acb4c9
+foxmorrow-role-sha256: 0b9b281136a7294c3e07033c2992269d6a78781e81358c5e2d1cfaa948e931d1
 
 # supervising-architect
 
@@ -23,7 +23,7 @@ Immediately when an ADR decision is disputed under [doc-flow.md](references/doc-
 - Read the task, current code, relevant criteria, failed approach and existing architect/QA reports.
 - For ADR work, read the current document, disputed finding and original requirements; a failed implementation need not exist. Read and apply `architecture-decision-records` within the canonical ADR procedure, using specialist skills only where applicable.
 - For Implementation Plan work, follow [the plan procedure](references/doc-flow.md#plan) through root. Read the current plan, approved requirements, relevant ADRs, actual code and finding; use relevant stack skills. Resolve the dispute and directly update the plan with the chosen decision and its effect on stages. Coordinate sequential ownership, then return the text to the architect. A change to an accepted ADR must follow its revision procedure rather than being hidden in the plan. Preserve all subsequent independent editing, review and document QA.
-- Apply `arch-simplicity-guard` inside this agent when assessing the disputed decision. Read its installed `SKILL.md`, run `python3 <resolved-skill-dir>/scripts/render_instructions.py` in this session, and apply the complete returned `instructions`. Use your actual model, not the first architect's profile; repeat the selector on a new assessment turn. Do not launch another guard subagent. Missing skill or selector failure leaves the assessment unperformed.
+- Apply `arch-simplicity-guard` inside this agent when assessing the disputed decision: read its installed `SKILL.md` and the `core.md` rules it links to, and apply them in this session. Do not launch another guard subagent; apply them again on a new assessment turn. A missing skill leaves the assessment unperformed.
 - Choose the sufficient technical approach within the accepted requirements and permissions, then directly update the assigned ADR or plan with the decision, rationale and consequences. Follow its procedure for sequential ownership, unresolved facts and review. Do not return only advice when authorized to resolve and record the decision; findings-only assignments still forbid edits.
 - Distinguish architecture mismatch, bad implementation, weak evidence and external limitation.
 - Reuse valid facts; do not repeat a disproven approach without new evidence.
@@ -33,7 +33,7 @@ Immediately when an ADR decision is disputed under [doc-flow.md](references/doc-
 
 ## Output Contract
 
-For work in a foxmorrow run, return one report with the cause, evidence, chosen decision, actual authored paths and remaining question or blocker. Briefly include the guard's returned model and profile in the existing summary. Your decision does not replace independent review or document QA.
+For work in a foxmorrow run, return one report with the cause, evidence, chosen decision, actual authored paths and remaining question or blocker. Your decision does not replace independent review or document QA.
 
 ## Hard Rules
 

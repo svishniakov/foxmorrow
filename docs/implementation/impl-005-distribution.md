@@ -968,6 +968,8 @@ git -c credential.helper= -c 'credential.helper=!gh auth git-credential' pull --
 
 * `arch-simplicity-guard` в Devin не выполняется: его `scripts/render_instructions.py` требует `CODEX_THREAD_ID`. Reviewer провёл проверку без guard и указал это в отчёте. Исправление относится к репозиторию guard.
 
+Исправлено после проверки: `arch-simplicity-guard` стал текстовыми правилами без скриптов и выбора по модели (коммит `bfaebd2` в `svishniakov/arch-simplicity-guard`). Роли `architect`, `supervising-architect` и `reviewer` применяют его как обычный skill в своей сессии; выпуск `v0.1.1`.
+
 ## Что остаётся непроверенным после плана
 
 * Запуск hooks на Windows: команда `${PLUGIN_ROOT}/bin/foxmorrow` указывает на загрузчик POSIX, а оболочка, которой Devin выполняет hooks на Windows, не проверялась. На Windows hooks могут не сработать; `verify` в этом случае читает `sessions.db`.

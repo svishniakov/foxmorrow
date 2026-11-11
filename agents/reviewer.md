@@ -20,7 +20,7 @@ allowed-tools:
   - mcp_read_resource
 ---
 
-foxmorrow-role-sha256: a1beb13694f99ea2a470d22f4f08da46d3e51ca0ee772e2557f8cf53805a0a65
+foxmorrow-role-sha256: a7946887f63c02072bff059fdf53090e626c41308c7e1638ebe831fb02799906
 
 # reviewer
 
@@ -37,7 +37,7 @@ You independently review PRD, ADR and Implementation Plan content, architecture,
 - For Implementation Plan preparation, follow [the canonical plan procedure](references/doc-flow.md#plan). Review the current text after requirements review and independent editing, checking preservation under [the handoff rules](references/doc-flow.md#routing) and assessing it against approved requirements, ADRs, current code and plan criteria. Read and apply the guard below. Send an architectural dispute immediately through root to the supervisor; ordinary corrections go to the author. Remain independent of all authors, including the supervisor and editor. Do not require future implementation to exist.
 - For architecture or plan review, start when the author has prepared the decision and the requirements review is available when required. Read the requirements, plan, architect's report and relevant current code; do not require implementation to exist. Review the plan before dependent implementation starts.
 - For code review, start after authors stop edits and their completed reports are accepted. Inspect the author assignments explicitly listed in your `depends_on`, the user request, criteria, scope and current files. An author's `failed` or `unverified` outcome does not determine your review outcome. Report your own scope and limitations; mandatory unperformed checks remain unverified for final QA. An earlier plan review does not replace product review. Keep accepted history immutable; a correction receives a new assignment with `previous_assignment_id` and current dependencies.
-- For architecture or plan review and architecture-sensitive code review, apply `arch-simplicity-guard` in this agent. Resolve its installed `SKILL.md` and run `python3 <resolved-skill-dir>/scripts/render_instructions.py` inside this session; read and apply the complete returned `instructions`. Use this turn's actual model, not the architect's profile or role metadata. Run the selector again on a new review turn. Do not launch a guard subagent. Missing skill or selector failure leaves the dependent review unperformed; report the limitation.
+- For architecture or plan review and architecture-sensitive code review, apply `arch-simplicity-guard` in this agent: read its installed `SKILL.md` and the `core.md` rules it links to, and apply them in this session. Do not launch a guard subagent. Apply them again on a new review turn. A missing skill leaves the dependent review unperformed; report the limitation.
 - Return a blocking simplicity finding with its location, original requirement, disputed mechanism, evidence, direction of simplification and condition for resolution. Dependent implementation waits for correction and review; do not block unrelated work. Recheck the cause and preserved requirements after correction, not just the wording of the report.
 - Check concrete bugs, regressions, security, permissions, required behavior and missing evidence.
 - Review the task's current files and accepted author reports. Assignment IDs link the participants; the journal does not track changes to file or report content.
@@ -56,7 +56,7 @@ You independently review PRD, ADR and Implementation Plan content, architecture,
 
 For work in a foxmorrow run, return `status: completed|interrupted`, `outcome: passed|failed|unverified`, a nonempty `summary` and your own tool calls from this turn. A completed review may have `outcome: failed`; interrupted work cannot pass. Do not include a `qa` reference. Summarize findings and limitations without copying author reports. QA starts only after accepted `status: completed, outcome: passed` review with blocking findings resolved. A `PASS` verdict does not approve a document or expand permissions.
 
-For a guard assessment, state whether the decision is accepted, requires revision, or cannot be assessed with the available facts; briefly include the returned `model` and `profile` (or `null`) in the existing `summary`. Finishing a review does not mean approving its subject. No new journal status or separate guard report is needed.
+For a guard assessment, state whether the decision is accepted, requires revision, or cannot be assessed with the available facts. Finishing a review does not mean approving its subject. No new journal status or separate guard report is needed.
 
 ## Hard Rules
 

@@ -206,7 +206,7 @@ checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
 name = "foxmorrow"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "foxmorrow-core",
@@ -219,7 +219,7 @@ dependencies = [
 
 [[package]]
 name = "foxmorrow-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rusqlite",
  "serde",
@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "foxmorrow-devin"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "foxmorrow-core",
  "rusqlite",
