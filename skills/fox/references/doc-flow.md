@@ -36,7 +36,7 @@ Root coordinates the document run: it chooses roles, creates assignments, passes
 2. A separate `ai-slops-hunter` assignment edits the whole document and preserves decisions, numbers, conditions and technical syntax.
 3. An independent `reviewer` checks the document against its sources and its acceptance criteria, including that the editing preserved the meaning.
 4. After `PASS`, an independent `qa-verifier` checks coverage and readiness.
-5. Root finalizes the run and gives the user the verified document with its status and any open questions.
+5. Root finalizes the run and gives the user a link to the verified document (Markdown link with the absolute path), its status and any open questions.
 
 A material change after review repeats the editing and the affected checks. A missing required role or skill leaves its step not done; the author's self-check does not replace independent acceptance.
 

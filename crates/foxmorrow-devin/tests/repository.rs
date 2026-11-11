@@ -347,3 +347,12 @@ fn orchestration_describes_every_memory_file() {
         );
     }
 }
+
+#[test]
+fn skill_requires_document_links_in_chat() {
+    let skill = std::fs::read_to_string(root().join("skills/fox/SKILL.md")).unwrap();
+    assert!(
+        skill.contains("give a link to it in the chat"),
+        "SKILL.md must require document links in chat"
+    );
+}

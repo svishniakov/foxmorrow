@@ -128,6 +128,14 @@ fn finds_the_latest_session_of_a_directory() {
         Some("dedicated-sherbet")
     );
     assert_eq!(reader.latest_session_in("/elsewhere").unwrap(), None);
+    assert_eq!(
+        reader
+            .latest_session_in("/fixture/project/polydesk-saas")
+            .unwrap()
+            .as_deref(),
+        Some("dedicated-sherbet")
+    );
+    assert_eq!(reader.latest_session_in("/fixture/projectx").unwrap(), None);
 }
 
 #[test]

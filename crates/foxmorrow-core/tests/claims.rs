@@ -475,3 +475,58 @@ fn report_call_recognizes_platform_launchers() {
         );
     }
 }
+
+#[cfg(unix)]
+#[test]
+fn inline_scripts_with_escaped_quotes_match_their_receipt() {
+    use foxmorrow_core::receipt;
+
+    let dir = tempfile::tempdir().unwrap();
+    let (run, mut journal) = new_run(dir.path());
+    let author = assignment::create(
+        &mut journal,
+        &run,
+        spec("backend-worker", Kind::Author, "swe-2-high", &[]),
+    )
+    .unwrap();
+    let script = "import sys\nprint(\"ok\")";
+    let check = receipt::run_check(
+        &mut journal,
+        &author.id,
+        dir.path(),
+        &[
+            "sh".into(),
+            "-c".into(),
+            format!("printf '%s' \"{script}\" >/dev/null"),
+        ],
+    )
+    .unwrap();
+    report::submit(
+        &mut journal,
+        &run,
+        &author.id,
+        &format!(
+            r#"{{"summary":"x","status":"completed","outcome":"passed","evidence":["{}"]}}"#,
+            check.id
+        ),
+    )
+    .unwrap();
+    let mut observed = observation(&author, "agent-1", "swe-2-high");
+    observed.tool_calls.push(ToolCall {
+        id: "c1".into(),
+        name: "exec".into(),
+        command: Some(format!(
+            "bin/foxmorrow check -a {} -- sh -c \"printf '%s' \\\"import sys\n  print(\\\\\\\"ok\\\\\\\")\\\" >/dev/null\"",
+            author.id
+        )),
+        exit_code: Some(0),
+    });
+    let verification =
+        claims::verify(&mut journal, &run, &author.id, Some(observed), &families()).unwrap();
+    assert_eq!(
+        claim_state(&verification.claims, "C4"),
+        ClaimState::Verified,
+        "{:?}",
+        verification.claims
+    );
+}

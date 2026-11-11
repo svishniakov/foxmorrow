@@ -109,14 +109,24 @@ impl Reader {
     }
 
     pub fn latest_session_in(&self, working_dir: &str) -> Result<Option<String>> {
-        Ok(self
+        let mut statement = self
             .conn
-            .query_row(
-                "SELECT id FROM sessions WHERE working_directory = ?1 ORDER BY last_activity_at DESC LIMIT 1",
-                [working_dir],
-                |row| row.get(0),
-            )
-            .optional()?)
+            .prepare("SELECT id, working_directory FROM sessions ORDER BY last_activity_at DESC")?;
+        let rows = statement.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?;
+        for row in rows {
+            let (id, directory) = row?;
+            let directory = directory.trim_end_matches('/');
+            if working_dir == directory
+                || working_dir
+                    .strip_prefix(directory)
+                    .is_some_and(|rest| rest.starts_with('/'))
+            {
+                return Ok(Some(id));
+            }
+        }
+        Ok(None)
     }
 
     pub fn root_model(&self, session_id: &str) -> Result<Option<String>> {

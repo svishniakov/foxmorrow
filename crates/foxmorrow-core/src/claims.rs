@@ -454,7 +454,11 @@ fn has_token(text: &str, token: &str) -> bool {
 }
 
 fn unquoted(text: &str) -> String {
-    text.chars().filter(|c| *c != '"' && *c != '\'').collect()
+    let kept: String = text
+        .chars()
+        .filter(|c| !matches!(c, '"' | '\'' | '\\'))
+        .collect();
+    kept.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
 fn is_foxmorrow(word: &str) -> bool {
