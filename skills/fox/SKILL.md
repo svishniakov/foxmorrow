@@ -29,7 +29,7 @@ Then follow [the orchestration procedure](references/orchestrator.md). For docum
 - A role subagent sees only its brief. Put everything it needs into the assignment: the goal, the paths and the dependencies.
 - Accepted reports never change. A correction is a new assignment with `--previous`.
 - Do not commit, push, publish or deploy without the user's explicit permission.
-- Whenever the user needs to read a document, give a link to it in the chat as a Markdown link with the absolute path, for example `[PRD-003](/abs/path/docs/PRD/prd-003.md)`, next to the question or result. Do not make the user search for files.
+- Whenever the user needs to read, review or approve a document, give a link to it in the chat as a Markdown link with the absolute path, for example `[PRD-003](/abs/path/docs/PRD/prd-003.md)`, next to the question or result. Every approval request links every document it asks about; a document name without a link is not enough. Do not make the user search for files.
 - Set `Document status: approved` only after the user approves the verified document.
 - When a missing decision changes scope or correctness, ask the user instead of guessing.
 - Read the project memory at the start of a run and update it after `finalize`, as `orchestrator.md` describes.
